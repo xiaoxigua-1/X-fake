@@ -19,7 +19,7 @@ abstract class SubCommand {
     }
 
     fun execute(sender: CommandSender, args: MutableList<String>): Boolean {
-        return if (args.isEmpty()) {
+        return if (args.size == 1) {
             onCommand(sender, args)
         } else {
             subCommands[args.first()]?.execute(sender, args) ?: throw CommandException("Command not found")
