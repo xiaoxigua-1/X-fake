@@ -1,0 +1,9 @@
+name: fake-player
+version: '${version}'
+main: org.xiaoxigua.fakeplayer.FakePlayerPlugin
+api-version: '1.20'
+
+commands:
+    fake:
+      description: spawn a fake player
+      usage: /spawn
