@@ -1,4 +1,4 @@
-package org.xiaoxigua.fakeplayer
+package org.xiaoxigua.fakeplayer.events
 
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
@@ -12,6 +12,7 @@ import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.xiaoxigua.fakeplayer.FakePlayerEntity
 
 class FakePlayerDeathEvent(private val fakePlayers: MutableList<FakePlayerEntity>) : Listener {
     @EventHandler

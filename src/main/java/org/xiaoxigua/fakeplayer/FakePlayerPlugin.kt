@@ -2,6 +2,7 @@ package org.xiaoxigua.fakeplayer
 
 import org.bukkit.plugin.java.JavaPlugin
 import org.xiaoxigua.fakeplayer.commands.Spawn
+import org.xiaoxigua.fakeplayer.events.FakePlayerDeathEvent
 
 class FakePlayerPlugin : JavaPlugin() {
     private val fakePlayers = mutableListOf<FakePlayerEntity>()
