@@ -12,8 +12,6 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
-import net.minecraft.world.entity.player.ChatVisiblity
-import net.minecraft.world.entity.player.Player
 import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
@@ -22,13 +20,14 @@ class FakePlayerEntity(
     server: MinecraftServer,
     private val world: ServerLevel,
     profile: GameProfile,
-    val clientInfo: ClientInformation = ClientInformation("en_us", 10, ChatVisiblity.FULL, true, 0, Player.DEFAULT_MAIN_HAND, false, false)
+    val clientInfo: ClientInformation = ClientInformation.createDefault()
 ) :
     ServerPlayer(server, world, profile, clientInfo) {
 
     fun spawn(location: Location) {
         setPos(location.x, location.y, location.z)
         addTag("fakePlayer")
+        setLoadViewDistance(10)
 
         connection = object : ServerGamePacketListenerImpl(
             server, EmptyConnection(PacketFlow.CLIENTBOUND), this,
