@@ -15,7 +15,7 @@ import java.util.*
 
 
 
-class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand {
+class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
     override val name = "spawn"
 
     override fun onCommand(
@@ -25,7 +25,7 @@ class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
         if (sender is Player) {
             val server = (sender.server as CraftServer).server
             val world = (sender.world as CraftWorld).handle
-            val gameProfile = GameProfile(UUID.randomUUID(), "fake_player")
+            val gameProfile = GameProfile(UUID.randomUUID(), args.removeFirst())
             val fakePlayer = FakePlayerEntity(server, world, gameProfile)
 
             fakePlayer.spawn(sender.location)
@@ -36,5 +36,9 @@ class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
         }
 
         return true
+    }
+
+    override fun onTabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String> {
+        return mutableListOf("fake_player", "xiao")
     }
 }

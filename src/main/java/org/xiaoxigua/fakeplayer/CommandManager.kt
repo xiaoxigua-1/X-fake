@@ -17,9 +17,7 @@ class CommandManager(commandName: String) {
             if (args.isEmpty()) {
                 // Help
             } else {
-                val last = args.removeLast()
-
-                commandManager.subCommands[last]?.onCommand(sender, args)
+                commandManager.subCommands[args.removeFirst()]?.execute(sender, args)
             }
 
             return true
@@ -33,7 +31,13 @@ class CommandManager(commandName: String) {
             string: String,
             args: Array<String>
         ): MutableList<String> {
-            return commandManager.subCommands.keys.toMutableList()
+            val args = args.toMutableList()
+
+            return if (args.size <= 1) {
+                commandManager.subCommands.keys.toMutableList()
+            } else {
+                commandManager.subCommands[args.removeFirst()]?.tabComplete(sender, args) ?: mutableListOf()
+            }
         }
     }
 
