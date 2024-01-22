@@ -3,6 +3,7 @@ package org.xiaoxigua.fakeplayer.commands
 import com.mojang.authlib.GameProfile
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.minecraft.world.phys.Vec3
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.v1_20_R3.CraftServer
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
@@ -25,10 +26,11 @@ class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
         if (sender is Player && !fakePlayers.any { it.displayName == name }) {
             val server = (sender.server as CraftServer).server
             val world = (sender.world as CraftWorld).handle
+            val location = sender.location
             val gameProfile = GameProfile(UUID.randomUUID(), name)
             val fakePlayer = FakePlayerEntity(server, world, gameProfile)
 
-            fakePlayer.spawn(sender.location)
+            fakePlayer.spawn(world, location)
             fakePlayers.add(fakePlayer)
         }
 

@@ -22,6 +22,8 @@ class FakePlayerPlugin : JavaPlugin() {
     }
 
     override fun onDisable() {
-        // Plugin shutdown logic
+        fakePlayers.forEach {
+            it.remove()
+        }
     }
 }

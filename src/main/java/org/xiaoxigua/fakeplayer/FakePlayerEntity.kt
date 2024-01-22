@@ -1,17 +1,23 @@
 package org.xiaoxigua.fakeplayer
 
 import com.mojang.authlib.GameProfile
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.PacketFlow
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ClientInformation
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.phys.Vec3
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
@@ -24,7 +30,7 @@ class FakePlayerEntity(
 ) :
     ServerPlayer(server, world, profile, clientInfo) {
 
-    fun spawn(location: Location) {
+    fun spawn(world: ServerLevel, location: Location) {
         addTag("fakePlayer")
         setLoadViewDistance(10)
 
@@ -37,7 +43,8 @@ class FakePlayerEntity(
         }
 
         server.playerList.placeNewPlayer(EmptyConnection(PacketFlow.CLIENTBOUND), this, CommonListenerCookie.createInitial(gameProfile))
-        setPos(location.x, location.y, location.z)
+        setLevel(world)
+        setPos(Vec3(location.toVector().toVector3f()))
 
         server.server.onlinePlayers.forEach { player ->
             val connection = (player as CraftPlayer).handle.connection
@@ -68,6 +75,34 @@ class FakePlayerEntity(
                 this,
             )
         )
+    }
+
+    fun remove() {
+        Bukkit.getOnlinePlayers().forEach {
+            val connection = (it as CraftPlayer).handle.connection
+
+            connection.send(
+                ClientboundPlayerInfoRemovePacket(
+                    listOf(uuid)
+                )
+            )
+
+            connection.send(
+                ClientboundPlayerInfoUpdatePacket(
+                    ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED,
+                    this
+                )
+            )
+
+            connection.send(
+                ClientboundRemoveEntitiesPacket(
+                    id,
+                )
+            )
+        }
+
+        world.removePlayerImmediately(this, RemovalReason.KILLED)
+        world.craftServer.handle.remove(this)
     }
 
     fun tp(tpWorld: ServerLevel, vec3: Vec3) {
