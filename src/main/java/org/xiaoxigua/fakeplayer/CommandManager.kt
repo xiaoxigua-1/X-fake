@@ -34,7 +34,7 @@ class CommandManager(commandName: String) {
             val args = args.toMutableList()
 
             return if (args.size <= 1) {
-                commandManager.subCommands.keys.toMutableList()
+                commandManager.subCommands.keys.filter { Regex(args.first()).containsMatchIn(it) }.toMutableList()
             } else {
                 commandManager.subCommands[args.removeFirst()]?.tabComplete(sender, args) ?: mutableListOf()
             }
@@ -48,5 +48,11 @@ class CommandManager(commandName: String) {
 
     fun addSubCommand(subCommand: SubCommand) {
         subCommands[subCommand.name] = subCommand
+    }
+
+    fun addSubCommand(vararg subCommands: SubCommand) {
+        subCommands.forEach {
+            addSubCommand(it)
+        }
     }
 }

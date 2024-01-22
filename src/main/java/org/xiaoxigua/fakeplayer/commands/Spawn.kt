@@ -30,9 +30,6 @@ class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
 
             fakePlayer.spawn(sender.location)
             fakePlayers.add(fakePlayer)
-            sender.server.onlinePlayers.forEach {
-                it.sendMessage(Component.text("${fakePlayer.displayName} Joined the game", NamedTextColor.YELLOW))
-            }
         }
 
         return true

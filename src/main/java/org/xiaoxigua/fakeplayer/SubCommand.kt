@@ -28,7 +28,7 @@ abstract class SubCommand {
 
     fun tabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String> {
         return if (args.size <= 1) {
-            onTabComplete(sender, args)
+            onTabComplete(sender, args).filter { Regex(args.first()).containsMatchIn(it) }.toMutableList()
         } else {
             subCommands[args.first()]?.tabComplete(sender, args) ?: mutableListOf()
         }

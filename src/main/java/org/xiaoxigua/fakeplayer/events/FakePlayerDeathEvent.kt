@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity
 import org.bukkit.Bukkit
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.craftbukkit.v1_20_R3.CraftServer
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.event.EventHandler
@@ -18,6 +19,7 @@ class FakePlayerDeathEvent(private val fakePlayers: MutableList<FakePlayerEntity
     @EventHandler
     fun onPlayerDeath(event: PlayerDeathEvent) {
         val world = (event.player.world as CraftWorld).handle
+        val server = (event.player.server as CraftServer).handle
         val fakePlayer = fakePlayers.find { it.uuid == event.player.uniqueId }
 
         if (fakePlayer != null) {
@@ -46,6 +48,7 @@ class FakePlayerDeathEvent(private val fakePlayers: MutableList<FakePlayerEntity
 
             fakePlayers.remove(fakePlayer)
             world.removePlayerImmediately(fakePlayer, Entity.RemovalReason.KILLED)
+            server.remove(fakePlayer)
             event.deathMessage(Component.text("${fakePlayer.displayName} left the game", NamedTextColor.YELLOW))
         }
     }
