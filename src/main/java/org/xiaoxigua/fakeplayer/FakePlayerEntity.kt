@@ -1,8 +1,6 @@
 package org.xiaoxigua.fakeplayer
 
 import com.mojang.authlib.GameProfile
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.PacketFlow
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
@@ -15,7 +13,6 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
-import net.minecraft.world.entity.Entity
 import net.minecraft.world.phys.Vec3
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -30,10 +27,7 @@ class FakePlayerEntity(
 ) :
     ServerPlayer(server, world, profile, clientInfo) {
 
-    fun spawn(world: ServerLevel, location: Location) {
-        addTag("fakePlayer")
-        setLoadViewDistance(10)
-
+    fun spawn(spawnWorld: ServerLevel, location: Location) {
         connection = object : ServerGamePacketListenerImpl(
             server, EmptyConnection(PacketFlow.CLIENTBOUND), this,
             CommonListenerCookie(gameProfile, 0, clientInfo)
@@ -43,8 +37,14 @@ class FakePlayerEntity(
         }
 
         server.playerList.placeNewPlayer(EmptyConnection(PacketFlow.CLIENTBOUND), this, CommonListenerCookie.createInitial(gameProfile))
-        setLevel(world)
+
+        world.removePlayerImmediately(this, RemovalReason.CHANGED_DIMENSION)
+        unsetRemoved()
+        setLevel(spawnWorld)
+        spawnWorld.addRespawnedPlayer(this)
         setPos(Vec3(location.toVector().toVector3f()))
+        addTag("fakePlayer")
+        setLoadViewDistance(10)
 
         server.server.onlinePlayers.forEach { player ->
             val connection = (player as CraftPlayer).handle.connection
@@ -101,6 +101,7 @@ class FakePlayerEntity(
             )
         }
 
+        inventory.dropAll()
         world.removePlayerImmediately(this, RemovalReason.KILLED)
         world.craftServer.handle.remove(this)
     }
