@@ -16,18 +16,26 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.world.phys.Vec3
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Server
+import org.bukkit.World
+import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
+import org.bukkit.entity.Player
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
 
 class FakePlayerEntity(
-    server: MinecraftServer,
-    private val world: ServerLevel,
+    server: Server,
+    world: World,
     profile: GameProfile,
     val clientInfo: ClientInformation = ClientInformation.createDefault()
 ) :
-    ServerPlayer(server, world, profile, clientInfo) {
+    ServerPlayer(server as MinecraftServer, world as ServerLevel, profile, clientInfo) {
 
-    fun spawn(spawnWorld: ServerLevel, location: Location) {
+    private val world = (world as ServerLevel)
+
+    fun spawn(spawnWorld: World, location: Location) {
+        val spawnServerLevel = (spawnWorld as CraftWorld).handle
+
         connection = object : ServerGamePacketListenerImpl(
             server, EmptyConnection(PacketFlow.CLIENTBOUND), this,
             CommonListenerCookie(gameProfile, 0, clientInfo)
@@ -40,20 +48,24 @@ class FakePlayerEntity(
 
         world.removePlayerImmediately(this, RemovalReason.CHANGED_DIMENSION)
         unsetRemoved()
-        setLevel(spawnWorld)
-        spawnWorld.addRespawnedPlayer(this)
+        setLevel(spawnServerLevel)
+        spawnServerLevel.addRespawnedPlayer(this)
         setPos(Vec3(location.toVector().toVector3f()))
         addTag("fakePlayer")
         setLoadViewDistance(10)
 
         server.server.onlinePlayers.forEach { player ->
-            val connection = (player as CraftPlayer).handle.connection
-
-            sendFakePlayerPacket(connection)
+            sendFakePlayerPacket(player)
         }
     }
 
-    fun sendFakePlayerPacket(connection: ServerGamePacketListenerImpl) {
+    fun sendFakePlayerPacket(player: Player) {
+        val connection = (player as CraftPlayer).handle.connection
+
+        sendFakePlayerPacket(connection)
+    }
+
+    private fun sendFakePlayerPacket(connection: ServerGamePacketListenerImpl) {
         // add player to list
         connection.send(
             ClientboundPlayerInfoUpdatePacket(
@@ -106,16 +118,18 @@ class FakePlayerEntity(
         world.craftServer.handle.remove(this)
     }
 
-    fun tp(tpWorld: ServerLevel, vec3: Vec3) {
-        if (world.uuid == tpWorld.uuid) {
+    fun tp(tpWorld: World, vec3: Vec3) {
+        val tpWorldLevel = (tpWorld as CraftWorld).handle
+
+        if (world.uuid == tpWorldLevel.uuid) {
             teleportTo(world, vec3)
         } else {
             val world = serverLevel()
 
             world.removePlayerImmediately(this, RemovalReason.CHANGED_DIMENSION)
             unsetRemoved()
-            setLevel(tpWorld)
-            tpWorld.addDuringCommandTeleport(this)
+            setLevel(tpWorldLevel)
+            tpWorldLevel.addDuringCommandTeleport(this)
             triggerDimensionChangeTriggers(world)
             setPos(vec3)
         }

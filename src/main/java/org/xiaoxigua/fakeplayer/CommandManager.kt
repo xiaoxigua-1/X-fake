@@ -1,5 +1,7 @@
 package org.xiaoxigua.fakeplayer
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -12,17 +14,24 @@ class CommandManager(commandName: String) {
 
     class MainCommandExecutor(private val commandManager: CommandManager) : CommandExecutor {
         override fun onCommand(sender: CommandSender, command: Command, commandString: String, args: Array<String>): Boolean {
-            val args = args.toMutableList()
+            val mutableListArgs = args.toMutableList()
 
             if (args.isEmpty()) {
                 // Help
             } else {
-                commandManager.subCommands[args.removeFirst()]?.execute(sender, args)
+                val commandName = mutableListArgs.removeFirst()
+
+                try {
+                    commandManager.subCommands[commandName]?.execute(sender, mutableListArgs) ?: throw CommandError.CommandNotFound(commandName)
+                } catch (commandError: Exception) {
+                    sender.sendMessage(Component.text(commandError.message ?: throw commandError, NamedTextColor.RED))
+                }
             }
 
             return true
         }
     }
+
 
     class MainCommandTabCompleter(private val commandManager: CommandManager) : TabCompleter {
         override fun onTabComplete(
@@ -31,12 +40,12 @@ class CommandManager(commandName: String) {
             string: String,
             args: Array<String>
         ): MutableList<String> {
-            val args = args.toMutableList()
+            val mutableListArgs = args.toMutableList()
 
             return if (args.size <= 1) {
                 commandManager.subCommands.keys.filter { Regex(args.first()).containsMatchIn(it) }.toMutableList()
             } else {
-                commandManager.subCommands[args.removeFirst()]?.tabComplete(sender, args) ?: mutableListOf()
+                commandManager.subCommands[mutableListArgs.removeFirst()]?.tabComplete(sender, mutableListArgs) ?: mutableListOf()
             }
         }
     }
@@ -46,7 +55,7 @@ class CommandManager(commandName: String) {
         mainCommand?.tabCompleter = MainCommandTabCompleter(this)
     }
 
-    fun addSubCommand(subCommand: SubCommand) {
+    private fun addSubCommand(subCommand: SubCommand) {
         subCommands[subCommand.name] = subCommand
     }
 

@@ -1,6 +1,5 @@
 package org.xiaoxigua.fakeplayer
 
-import org.bukkit.command.CommandException
 import org.bukkit.command.CommandSender
 
 abstract class SubCommand {
@@ -22,7 +21,9 @@ abstract class SubCommand {
         return if (args.size == 1) {
             onCommand(sender, args)
         } else {
-            subCommands[args.first()]?.execute(sender, args) ?: throw CommandException("Command not found")
+            val commandName = args.first()
+
+            subCommands[commandName]?.execute(sender, args) ?: throw CommandError.CommandNotFound(commandName)
         }
     }
 
