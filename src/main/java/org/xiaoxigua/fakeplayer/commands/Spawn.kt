@@ -21,7 +21,7 @@ class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
             throw CommandError.CommandStringLimit(16, name.length)
         } else if (sender is Player && !fakePlayers.any { it.displayName == name }) {
             val location = sender.location
-            val gameProfile = GameProfile(UUID.randomUUID(), name)
+            val gameProfile = GameProfile(UUID.nameUUIDFromBytes(name.toByteArray()), name)
             val fakePlayer = FakePlayerEntity(sender.server, sender.world, gameProfile)
 
             fakePlayer.spawn(sender.world, location)

@@ -4,12 +4,11 @@ import com.mojang.authlib.GameProfile
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.PacketFlow
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundAnimatePacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
-import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ClientInformation
-import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
@@ -18,28 +17,21 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Server
 import org.bukkit.World
+import org.bukkit.craftbukkit.v1_20_R3.CraftServer
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
 
-class FakePlayerEntity(
-    server: Server,
-    world: World,
-    profile: GameProfile,
-    val clientInfo: ClientInformation = ClientInformation.createDefault()
-) :
-    ServerPlayer(server as MinecraftServer, world as ServerLevel, profile, clientInfo) {
+class FakePlayerEntity(server: Server, world: World, profile: GameProfile, val clientInfo: ClientInformation = ClientInformation.createDefault()) : ServerPlayer((server as CraftServer).server, (world as CraftWorld).handle, profile, clientInfo) {
 
-    private val world = (world as ServerLevel)
+    private val world = (world as CraftWorld).handle
 
     fun spawn(spawnWorld: World, location: Location) {
         val spawnServerLevel = (spawnWorld as CraftWorld).handle
 
-        connection = object : ServerGamePacketListenerImpl(
-            server, EmptyConnection(PacketFlow.CLIENTBOUND), this,
-            CommonListenerCookie(gameProfile, 0, clientInfo)
-        ) {
+        connection = object : ServerGamePacketListenerImpl(server, EmptyConnection(PacketFlow.CLIENTBOUND), this, CommonListenerCookie(gameProfile, 0, clientInfo)) {
             override fun send(packet: Packet<*>) {
             }
         }
@@ -53,10 +45,9 @@ class FakePlayerEntity(
         setPos(Vec3(location.toVector().toVector3f()))
         addTag("fakePlayer")
         setLoadViewDistance(10)
-
-        server.server.onlinePlayers.forEach { player ->
-            sendFakePlayerPacket(player)
-        }
+        sendAllPlayerPacket({ connection ->
+            sendFakePlayerPacket(connection)
+        })
     }
 
     fun sendFakePlayerPacket(player: Player) {
@@ -67,51 +58,45 @@ class FakePlayerEntity(
 
     private fun sendFakePlayerPacket(connection: ServerGamePacketListenerImpl) {
         // add player to list
-        connection.send(
-            ClientboundPlayerInfoUpdatePacket(
-                ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
-                this
-            )
-        )
+        connection.send(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, this))
 
-        connection.send(
-            ClientboundPlayerInfoUpdatePacket(
-                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED,
-                this
-            )
-        )
+        // update player list
+        connection.send(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED, this))
 
         // make player spawn in world
-        connection.send(
-            ClientboundAddEntityPacket(
+        connection.send(ClientboundAddEntityPacket(
                 this,
-            )
-        )
+        ))
     }
 
-    fun remove() {
+    private fun sendRemoveFakePlayerPacket(connection: ServerGamePacketListenerImpl) {
+        connection.send(ClientboundPlayerInfoRemovePacket(listOf(uuid)))
+
+        connection.send(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED, this))
+
+        connection.send(ClientboundRemoveEntitiesPacket(
+                id,
+        ))
+    }
+
+    private fun sendFakePlayerAttackAnimation(connection: ServerGamePacketListenerImpl) {
+        connection.send(ClientboundAnimatePacket(bukkitEntity.handleRaw!!, 0))
+    }
+
+    private fun sendAllPlayerPacket(vararg sendPacket: (ServerGamePacketListenerImpl) -> Unit) {
         Bukkit.getOnlinePlayers().forEach {
             val connection = (it as CraftPlayer).handle.connection
 
-            connection.send(
-                ClientboundPlayerInfoRemovePacket(
-                    listOf(uuid)
-                )
-            )
-
-            connection.send(
-                ClientboundPlayerInfoUpdatePacket(
-                    ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED,
-                    this
-                )
-            )
-
-            connection.send(
-                ClientboundRemoveEntitiesPacket(
-                    id,
-                )
-            )
+            sendPacket.forEach {
+                it(connection)
+            }
         }
+    }
+
+    fun remove() {
+        sendAllPlayerPacket({ connection ->
+            sendRemoveFakePlayerPacket(connection)
+        })
 
         inventory.dropAll()
         world.removePlayerImmediately(this, RemovalReason.KILLED)
@@ -132,6 +117,17 @@ class FakePlayerEntity(
             tpWorldLevel.addDuringCommandTeleport(this)
             triggerDimensionChangeTriggers(world)
             setPos(vec3)
+        }
+    }
+
+    fun attack() {
+        val attackTarget = this.bukkitEntity.player?.getTargetEntity(3)
+
+        if (attackTarget != null) {
+            attack((attackTarget as CraftEntity).handle)
+            sendAllPlayerPacket({ connection ->
+                sendFakePlayerAttackAnimation(connection)
+            })
         }
     }
 }
