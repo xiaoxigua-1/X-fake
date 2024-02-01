@@ -118,4 +118,5 @@ run/
 !gradle-wrapper.jar
 
 # Test Server directory
-server/
+server/*
+!server/docker-compose.yml
