@@ -13,10 +13,11 @@ class Spawn(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComman
     override val description = "spawn new fake player"
 
     override fun onCommand(
-        sender: CommandSender,
-        args: MutableList<String>
+            sender: CommandSender,
+            commandArgs: MutableList<String>,
+            args: MutableList<String>
     ): Boolean {
-        val name = args.removeFirst()
+        val name = args.first()
 
         if (name.length > 16) {
             throw CommandError.CommandStringLimit(16, name.length)

@@ -9,11 +9,11 @@ abstract class SubCommand {
     private val subCommands = mutableMapOf<String, SubCommand>()
     abstract val fakePlayers: MutableList<FakePlayerEntity>
 
-    open fun onCommand(sender: CommandSender, args: MutableList<String>): Boolean {
+    open fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
         return true
     }
 
-    open fun onTabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String> {
+    open fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {
         return subCommands.keys.toMutableList()
     }
 
@@ -23,20 +23,24 @@ abstract class SubCommand {
         subCommands[subCommand.name] = subCommand
     }
 
-    fun execute(sender: CommandSender, args: MutableList<String>): Boolean {
-        return if (args.size == 1) {
-            onCommand(sender, args)
-        } else {
-            val commandName = args.removeAt(1)
+    fun execute(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+        val commandName = commandArgs.firstOrNull()
+        val subCommand = subCommands[commandName]
 
-            subCommands[commandName]?.execute(sender, args) ?: throw CommandError.CommandNotFound(commandName)
+        return if (subCommand != null) {
+            commandArgs.removeFirst()
+            subCommand.execute(sender, commandArgs, args)
+        } else {
+            onCommand(sender, commandArgs, args)
         }
     }
 
-    fun tabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String> {
-        val firstArg = args.removeFirstOrNull() ?: ""
+    fun tabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String>? {
+        val firstArg = args.removeFirstOrNull()
 
-        return subCommands[firstArg]?.tabComplete(sender, args)
-                ?: onTabComplete(sender, args).filter { it.contains(firstArg, ignoreCase = true) }.toMutableList()
+        return if (firstArg != null)
+            subCommands[firstArg]?.tabComplete(sender, args)
+                    ?: onTabComplete(sender, args).filter { it.contains(firstArg, ignoreCase = true) }.toMutableList()
+        else null
     }
 }

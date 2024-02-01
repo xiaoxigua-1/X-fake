@@ -13,15 +13,17 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
     private val subCommands = mutableMapOf<String, SubCommand>()
 
     class MainCommandExecutor(private val commandManager: CommandManager) : CommandExecutor {
-        override fun onCommand(sender: CommandSender, command: Command, commandString: String, args: Array<String>): Boolean {
-            val mutableListArgs = args.toMutableList()
+        override fun onCommand(sender: CommandSender, command: Command, commandString: String, commandARgs: Array<String>): Boolean {
+            val mutableListArgs = commandARgs.toMutableList()
 
             try {
-                if (args.size < 2) {
+                if (commandARgs.size < 2) {
                     // Help
                 } else {
-                    val commandName = mutableListArgs.removeAt(1)
-                    commandManager.subCommands[commandName]?.execute(sender, mutableListArgs)
+                    val args = mutableListOf(mutableListArgs.removeFirst())
+                    val commandName = mutableListArgs.removeFirst()
+
+                    commandManager.subCommands[commandName]?.execute(sender, mutableListArgs, args)
                             ?: throw CommandError.CommandNotFound(commandName)
                 }
 

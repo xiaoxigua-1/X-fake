@@ -8,30 +8,27 @@ class Interval(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCom
     override val name = "interval"
     override val description = "set periodic attack"
 
-    private val defaultTime = 20L
+    private val defaultTime = 20
 
-    override fun onCommand(sender: CommandSender, args: MutableList<String>): Boolean {
-        val name = args.removeFirst()
+    override fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+        val name = args.first()
         val fakePlayer = fakePlayers.find { it.displayName == name }
                 ?: throw CommandError.CommandFakePlayerNotFound(name)
-        val time = args.removeFirstOrNull()?.takeIf {
+        val time = (commandArgs.removeFirstOrNull() ?: defaultTime.toString()).takeIf {
             Regex("\\d+").matches(it)
-        }?.toLong() ?: defaultTime
+        }?.toLong() ?: throw CommandError.CommandArgTypeError("Int")
+        val task = object : BukkitRunnable() {
+            override fun run() {
+                fakePlayer.attack()
+            }
+        }.runTaskTimer(FakePlayerPlugin.currentPlugin!!, 0L, time)
 
-        if (args.isEmpty()) {
-            val task = object : BukkitRunnable() {
-                override fun run() {
-                    fakePlayer.attack()
-                }
-            }.runTaskTimer(FakePlayerPlugin.currentPlugin!!, 0L, time)
+        fakePlayer.taskManager.addTask(FakePlayerTask.TaskType.Attack, task)
 
-            fakePlayer.taskManager.addTask(FakePlayerTask.TaskType.Attack, task)
-        }
-
-        return super.onCommand(sender, args)
+        return true
     }
 
-    override fun onTabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String> {
+    override fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {
         return (10..50 step 10).map(Int::toString).toMutableList()
     }
 }

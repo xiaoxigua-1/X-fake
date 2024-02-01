@@ -11,8 +11,8 @@ class TPHere(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
     override val name = "tphere"
     override val description = "tp fake player to your position"
 
-    override fun onCommand(sender: CommandSender, args: MutableList<String>): Boolean {
-        val name = args.removeFirst()
+    override fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+        val name = args.first()
 
         if (sender is Player) {
             fakePlayers.find { it.displayName == name }
