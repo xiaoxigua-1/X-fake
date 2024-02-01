@@ -17,4 +17,10 @@ class FakePlayerTask {
         tasks[type]?.cancel()
         tasks.remove(type)
     }
+
+    fun removeAllTask() {
+        tasks.forEach { (_, task) ->
+            task.cancel()
+        }
+    }
 }

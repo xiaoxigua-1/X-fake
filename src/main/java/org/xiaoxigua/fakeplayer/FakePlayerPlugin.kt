@@ -29,5 +29,6 @@ class FakePlayerPlugin : JavaPlugin() {
         fakePlayers.forEach {
             it.remove()
         }
+        fakePlayers.clear()
     }
 }

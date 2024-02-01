@@ -16,17 +16,17 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
         override fun onCommand(sender: CommandSender, command: Command, commandString: String, args: Array<String>): Boolean {
             val mutableListArgs = args.toMutableList()
 
-            if (args.size < 2) {
-                // Help
-            } else {
-                val commandName = mutableListArgs.removeAt(1)
-
-                try {
+            try {
+                if (args.size < 2) {
+                    // Help
+                } else {
+                    val commandName = mutableListArgs.removeAt(1)
                     commandManager.subCommands[commandName]?.execute(sender, mutableListArgs)
                             ?: throw CommandError.CommandNotFound(commandName)
-                } catch (commandError: Exception) {
-                    sender.sendMessage(Component.text(commandError.message ?: throw commandError, NamedTextColor.RED))
                 }
+
+            } catch (commandError: Exception) {
+                sender.sendMessage(Component.text(commandError.message ?: throw commandError, NamedTextColor.RED))
             }
 
             return true
@@ -45,12 +45,12 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
             mutableListArgs.removeFirst()
 
             return if (args.size <= 1) {
-                commandManager.fakePlayers.map { it.displayName }.ifEmpty { listOf("Alex", "Fake_Player") }.toMutableList()
+                commandManager.fakePlayers.map { it.displayName }.plus(listOf("Alex", "Fake_Player")).toMutableList()
             } else {
                 val firstArg = mutableListArgs.removeFirst()
 
                 commandManager.subCommands[firstArg]?.tabComplete(sender, mutableListArgs)
-                        ?: commandManager.subCommands.keys.filter { Regex(firstArg).containsMatchIn(it) }.toMutableList()
+                        ?: commandManager.subCommands.keys.filter { it.contains(firstArg, ignoreCase = true) }.toMutableList()
             }
         }
     }

@@ -96,7 +96,7 @@ class FakePlayerEntity(server: Server, world: World, profile: GameProfile, val c
 
     fun remove() {
         sendAllPlayerPacket(::sendRemoveFakePlayerPacket)
-
+        taskManager.removeAllTask()
         inventory.dropAll()
         world.removePlayerImmediately(this, RemovalReason.KILLED)
         world.craftServer.handle.remove(this)

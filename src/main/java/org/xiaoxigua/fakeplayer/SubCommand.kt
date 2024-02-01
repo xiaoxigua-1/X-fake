@@ -37,6 +37,6 @@ abstract class SubCommand {
         val firstArg = args.removeFirstOrNull() ?: ""
 
         return subCommands[firstArg]?.tabComplete(sender, args)
-                ?: onTabComplete(sender, args).filter { Regex(firstArg).containsMatchIn(it) }.toMutableList()
+                ?: onTabComplete(sender, args).filter { it.contains(firstArg, ignoreCase = true) }.toMutableList()
     }
 }
