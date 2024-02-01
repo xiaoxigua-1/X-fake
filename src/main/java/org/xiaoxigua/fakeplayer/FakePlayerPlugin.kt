@@ -8,10 +8,15 @@ import org.xiaoxigua.fakeplayer.events.FakePlayerInWorldEvent
 class FakePlayerPlugin : JavaPlugin() {
     private val fakePlayers = mutableListOf<FakePlayerEntity>()
 
-    override fun onEnable() {
-        val commandManager = CommandManager("fake")
+    companion object {
+        var currentPlugin: JavaPlugin? = null
+    }
 
-        commandManager.addSubCommand(Spawn(fakePlayers), Kill(fakePlayers), TPHere(fakePlayers), Attack(fakePlayers))
+    override fun onEnable() {
+        val commandManager = CommandManager("fake", fakePlayers)
+
+        currentPlugin = this
+        commandManager.addSubCommand(::Spawn, ::Kill, ::TPHere, ::Attack)
         server.pluginManager.registerEvents(FakePlayerInWorldEvent(fakePlayers), this)
         server.scheduler.scheduleSyncRepeatingTask(this, {
             fakePlayers.forEach {

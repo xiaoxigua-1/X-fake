@@ -8,7 +8,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 
-class CommandManager(commandName: String) {
+class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlayerEntity>) {
     private val mainCommand = Bukkit.getPluginCommand(commandName)
     private val subCommands = mutableMapOf<String, SubCommand>()
 
@@ -16,13 +16,14 @@ class CommandManager(commandName: String) {
         override fun onCommand(sender: CommandSender, command: Command, commandString: String, args: Array<String>): Boolean {
             val mutableListArgs = args.toMutableList()
 
-            if (args.isEmpty()) {
+            if (args.size < 2) {
                 // Help
             } else {
-                val commandName = mutableListArgs.removeFirst()
+                val commandName = mutableListArgs.removeAt(1)
 
                 try {
-                    commandManager.subCommands[commandName]?.execute(sender, mutableListArgs) ?: throw CommandError.CommandNotFound(commandName)
+                    commandManager.subCommands[commandName]?.execute(sender, mutableListArgs)
+                            ?: throw CommandError.CommandNotFound(commandName)
                 } catch (commandError: Exception) {
                     sender.sendMessage(Component.text(commandError.message ?: throw commandError, NamedTextColor.RED))
                 }
@@ -35,17 +36,21 @@ class CommandManager(commandName: String) {
 
     class MainCommandTabCompleter(private val commandManager: CommandManager) : TabCompleter {
         override fun onTabComplete(
-            sender: CommandSender,
-            command: Command,
-            string: String,
-            args: Array<String>
+                sender: CommandSender,
+                command: Command,
+                string: String,
+                args: Array<String>
         ): MutableList<String> {
             val mutableListArgs = args.toMutableList()
+            mutableListArgs.removeFirst()
 
             return if (args.size <= 1) {
-                commandManager.subCommands.keys.filter { Regex(args.first()).containsMatchIn(it) }.toMutableList()
+                commandManager.fakePlayers.map { it.displayName }.ifEmpty { listOf("Alex", "Fake_Player") }.toMutableList()
             } else {
-                commandManager.subCommands[mutableListArgs.removeFirst()]?.tabComplete(sender, mutableListArgs) ?: mutableListOf()
+                val firstArg = mutableListArgs.removeFirst()
+
+                commandManager.subCommands[firstArg]?.tabComplete(sender, mutableListArgs)
+                        ?: commandManager.subCommands.keys.filter { Regex(firstArg).containsMatchIn(it) }.toMutableList()
             }
         }
     }
@@ -59,9 +64,9 @@ class CommandManager(commandName: String) {
         subCommands[subCommand.name] = subCommand
     }
 
-    fun addSubCommand(vararg subCommands: SubCommand) {
+    fun addSubCommand(vararg subCommands: (MutableList<FakePlayerEntity>) -> SubCommand) {
         subCommands.forEach {
-            addSubCommand(it)
+            addSubCommand(it(fakePlayers))
         }
     }
 }

@@ -8,8 +8,9 @@ import org.xiaoxigua.fakeplayer.FakePlayerEntity
 import org.xiaoxigua.fakeplayer.SubCommand
 import java.util.*
 
-class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
+class Spawn(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
     override val name = "spawn"
+    override val description = "spawn new fake player"
 
     override fun onCommand(
         sender: CommandSender,
@@ -29,9 +30,5 @@ class Spawn(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
         }
 
         return true
-    }
-
-    override fun onTabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String> {
-        return mutableListOf("Alex", "fake_player")
     }
 }

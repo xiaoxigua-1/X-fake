@@ -22,11 +22,13 @@ import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerRespawnEvent
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
 
 class FakePlayerEntity(server: Server, world: World, profile: GameProfile, val clientInfo: ClientInformation = ClientInformation.createDefault()) : ServerPlayer((server as CraftServer).server, (world as CraftWorld).handle, profile, clientInfo) {
 
     private val world = (world as CraftWorld).handle
+    val taskManager = FakePlayerTask()
 
     fun spawn(spawnWorld: World, location: Location) {
         val spawnServerLevel = (spawnWorld as CraftWorld).handle
@@ -37,6 +39,7 @@ class FakePlayerEntity(server: Server, world: World, profile: GameProfile, val c
         }
 
         server.playerList.placeNewPlayer(EmptyConnection(PacketFlow.CLIENTBOUND), this, CommonListenerCookie.createInitial(gameProfile))
+        server.playerList.respawn(this, false, PlayerRespawnEvent.RespawnReason.DEATH)
 
         world.removePlayerImmediately(this, RemovalReason.CHANGED_DIMENSION)
         unsetRemoved()
@@ -45,9 +48,7 @@ class FakePlayerEntity(server: Server, world: World, profile: GameProfile, val c
         setPos(Vec3(location.toVector().toVector3f()))
         addTag("fakePlayer")
         setLoadViewDistance(10)
-        sendAllPlayerPacket({ connection ->
-            sendFakePlayerPacket(connection)
-        })
+        sendAllPlayerPacket(::sendFakePlayerPacket)
     }
 
     fun sendFakePlayerPacket(player: Player) {
@@ -94,9 +95,7 @@ class FakePlayerEntity(server: Server, world: World, profile: GameProfile, val c
     }
 
     fun remove() {
-        sendAllPlayerPacket({ connection ->
-            sendRemoveFakePlayerPacket(connection)
-        })
+        sendAllPlayerPacket(::sendRemoveFakePlayerPacket)
 
         inventory.dropAll()
         world.removePlayerImmediately(this, RemovalReason.KILLED)
@@ -125,9 +124,7 @@ class FakePlayerEntity(server: Server, world: World, profile: GameProfile, val c
 
         if (attackTarget != null) {
             attack((attackTarget as CraftEntity).handle)
-            sendAllPlayerPacket({ connection ->
-                sendFakePlayerAttackAnimation(connection)
-            })
+            sendAllPlayerPacket(::sendFakePlayerAttackAnimation)
         }
     }
 }

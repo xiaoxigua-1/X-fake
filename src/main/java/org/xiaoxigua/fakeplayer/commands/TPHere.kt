@@ -6,8 +6,9 @@ import org.bukkit.entity.Player
 import org.xiaoxigua.fakeplayer.FakePlayerEntity
 import org.xiaoxigua.fakeplayer.SubCommand
 
-class TPHere(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
+class TPHere(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
     override val name = "tphere"
+    override val description = "tp fake player to your position"
 
     override fun onCommand(sender: CommandSender, args: MutableList<String>): Boolean {
         val name = args.removeFirst()
@@ -18,9 +19,5 @@ class TPHere(private val fakePlayers: MutableList<FakePlayerEntity>) : SubComman
         }
 
         return true
-    }
-
-    override fun onTabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String> {
-        return fakePlayers.map { it.displayName }.toMutableList()
     }
 }

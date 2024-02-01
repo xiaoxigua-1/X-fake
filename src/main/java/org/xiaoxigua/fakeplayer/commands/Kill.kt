@@ -4,8 +4,9 @@ import org.bukkit.command.CommandSender
 import org.xiaoxigua.fakeplayer.FakePlayerEntity
 import org.xiaoxigua.fakeplayer.SubCommand
 
-class Kill(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
+class Kill(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
     override val name = "kill"
+    override val description = "kill fake player"
 
     override fun onCommand(sender: CommandSender, args: MutableList<String>): Boolean {
         val name = args.removeFirst()
@@ -13,9 +14,5 @@ class Kill(private val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand(
         fakePlayers.find { it.displayName == name }?.kill()
 
         return true
-    }
-
-    override fun onTabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String> {
-        return fakePlayers.map { it.displayName }.toMutableList()
     }
 }
