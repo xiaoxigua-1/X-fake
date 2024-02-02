@@ -2,6 +2,7 @@ package org.xiaoxigua.fakeplayer
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -18,7 +19,7 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
 
             try {
                 if (commandARgs.size < 2) {
-                    // Help
+                    sender.sendMessage(help())
                 } else {
                     val args = mutableListOf(mutableListArgs.removeFirst())
                     val commandName = mutableListArgs.removeFirst()
@@ -32,6 +33,19 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
             }
 
             return true
+        }
+
+        private fun help(): Component {
+            var helpText = Component.text("----------", NamedTextColor.YELLOW)
+                    .append(Component.text("Help", TextColor.color(0xffa500)))
+                    .append(Component.text("----------\n", NamedTextColor.YELLOW))
+
+            commandManager.subCommands.forEach { (_, command) ->
+                helpText = helpText.append(Component.text(command.name, TextColor.color(0xffa500)))
+                        .append(Component.text(": ${command.description}\n"))
+            }
+
+            return helpText
         }
     }
 

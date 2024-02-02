@@ -3,6 +3,7 @@ package org.xiaoxigua.fakeplayer
 import org.bukkit.plugin.java.JavaPlugin
 import org.xiaoxigua.fakeplayer.commands.*
 import org.xiaoxigua.fakeplayer.commands.attack.Attack
+import org.xiaoxigua.fakeplayer.commands.rotate.Rotate
 import org.xiaoxigua.fakeplayer.events.FakePlayerInWorldEvent
 
 class FakePlayerPlugin : JavaPlugin() {
@@ -16,7 +17,7 @@ class FakePlayerPlugin : JavaPlugin() {
         val commandManager = CommandManager("fake", fakePlayers)
 
         currentPlugin = this
-        commandManager.addSubCommand(::Spawn, ::Kill, ::TPHere, ::Attack)
+        commandManager.addSubCommand(::Spawn, ::Kill, ::TPHere, ::Attack, ::Rotate)
         server.pluginManager.registerEvents(FakePlayerInWorldEvent(fakePlayers), this)
         server.scheduler.scheduleSyncRepeatingTask(this, {
             fakePlayers.forEach {

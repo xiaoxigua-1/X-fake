@@ -2,8 +2,48 @@ name: fake-player
 version: '${version}'
 main: org.xiaoxigua.fakeplayer.FakePlayerPlugin
 api-version: '1.20'
+website: https://github.com/xiaoxigua-1/X-fake
+author: xiaoxigua
+description: fake player spigot plugin
 
 commands:
     fake:
       description: fake player command
-      usage: /fake
+      usage: /fake <Fake Player Name> <SubCommand>
+      permission: fake-player.normal
+
+    fake-killAll:
+      description: kill all fake players
+      usage: /fake-killAll
+      permission: fake-player.commands.killAll
+
+    fake-reload:
+      description: reload fake player plugin
+      usage: /fake-reload
+      permission: fake-player.commands.reload
+
+permissions:
+  fake-player.*:
+    description: Allows usage of the /fake all command
+    children:
+      - fake-player.normal
+      - fake-player.commands.reload
+      - fake-player.commands.killAll
+
+  fake-player.normal:
+    description: Allows usage of the /fake command
+    default-permission: true
+
+  fake-player.op:
+    description: Allows usage of the op command
+    children:
+      - fake-player.commands.reload
+      - fake-player.commands.killAll
+
+  fake-player.commands.reload:
+    description: Allows usage of the reload plugins
+    default: op
+
+  fake-player.commands.killAll:
+    description: Allows usage of the /killAllFake command
+    default: op

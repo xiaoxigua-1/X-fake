@@ -46,6 +46,7 @@ class FakePlayerEntity(server: Server, world: World, profile: GameProfile, val c
         setLevel(spawnServerLevel)
         spawnServerLevel.addRespawnedPlayer(this)
         setPos(Vec3(location.toVector().toVector3f()))
+        setRot(location.yaw, location.pitch)
         addTag("fakePlayer")
         setLoadViewDistance(10)
         sendAllPlayerPacket(::sendFakePlayerPacket)

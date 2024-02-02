@@ -4,7 +4,8 @@ import org.bukkit.scheduler.BukkitTask
 
 class FakePlayerTask {
     enum class TaskType {
-        Attack
+        Attack,
+        Rotate
     }
 
     private val tasks: MutableMap<TaskType, BukkitTask> = mutableMapOf()
