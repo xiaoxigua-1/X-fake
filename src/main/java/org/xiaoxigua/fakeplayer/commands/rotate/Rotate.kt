@@ -8,6 +8,6 @@ class Rotate(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
     override val description = "set fake player rotate action"
 
     init {
-        addSunCommand(::Linear)
+        addSubCommand(::Linear, ::Look)
     }
 }

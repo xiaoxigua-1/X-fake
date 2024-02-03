@@ -12,10 +12,8 @@ class Linear(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
         val name = args.first()
         val fakePlayer = fakePlayers.find { it.displayName == name }
                 ?: throw CommandError.CommandFakePlayerNotFound(name)
-        val yaw = (commandArgs.removeFirstOrNull() ?: "10").takeIf { Regex("\\d+").matches(it) }?.toFloat()
-                ?: throw CommandError.CommandArgTypeError("Int")
-        val pitch = (commandArgs.removeFirstOrNull() ?: "10").takeIf { Regex("\\d+").matches(it) }?.toFloat()
-                ?: throw CommandError.CommandArgTypeError("Int")
+        val yaw = getArg(commandArgs)
+        val pitch = getArg(commandArgs)
         val task = object : BukkitRunnable() {
             override fun run() {
                 val nowYaw = fakePlayer.bukkitEntity.yaw
@@ -27,14 +25,24 @@ class Linear(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
 
         fakePlayer.taskManager.addTask(FakePlayerTask.TaskType.Rotate, task)
 
-        return super.onCommand(sender, commandArgs, args)
+        return true
     }
 
     override fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {
         return if (commandArgs.size < 2) {
-            (1..179).map(Int::toString)
+            (-179..179).map(Int::toString)
         } else {
             listOf()
         }.toMutableList()
+    }
+
+    private fun getArg(commandArgs: MutableList<String>): Float {
+        val arg = commandArgs.removeFirstOrNull() ?: "10"
+
+        return if (Regex("-?\\d+").matches(arg)) {
+            arg.toFloat()
+        } else {
+            throw CommandError.CommandArgTypeError("Int")
+        }
     }
 }

@@ -20,10 +20,16 @@ abstract class SubCommand {
         return subCommands.keys.toMutableList()
     }
 
-    fun addSunCommand(subCommandFun: (MutableList<FakePlayerEntity>) -> SubCommand) {
+    fun addSubCommand(subCommandFun: (MutableList<FakePlayerEntity>) -> SubCommand) {
         val subCommand = subCommandFun(fakePlayers)
 
         subCommands[subCommand.name] = subCommand
+    }
+
+    fun addSubCommand(vararg subCommand: (MutableList<FakePlayerEntity>) -> SubCommand) {
+        subCommand.forEach {
+            addSubCommand(it)
+        }
     }
 
     fun execute(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
