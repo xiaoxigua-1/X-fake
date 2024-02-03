@@ -17,9 +17,7 @@ abstract class SubCommand {
     }
 
     open fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {
-        val firstArg = commandArgs.removeFirst()
-
-        return subCommands.keys.toMutableList().filter { it.contains(firstArg, ignoreCase = true) }.toMutableList()
+        return subCommands.keys.toMutableList()
     }
 
     fun addSunCommand(subCommandFun: (MutableList<FakePlayerEntity>) -> SubCommand) {
@@ -44,11 +42,12 @@ abstract class SubCommand {
     }
 
     fun tabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String>? {
-        val firstArg = args.firstOrNull()
+        val firstArg = args.removeFirstOrNull()
 
         return if (firstArg != null)
             subCommands[firstArg]?.tabComplete(sender, args)
-                    ?: onTabComplete(sender, args)
+                ?: onTabComplete(sender, args).filter { it.contains(args.lastOrNull() ?: firstArg, ignoreCase = true) }
+                    .toMutableList()
         else null
     }
 

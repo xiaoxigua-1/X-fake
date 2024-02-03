@@ -31,10 +31,10 @@ class Linear(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
     }
 
     override fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {
-        return if (commandArgs.size < 4) {
+        return if (commandArgs.size < 2) {
             (1..179).map(Int::toString)
         } else {
             listOf()
-        }.filter { it.contains(commandArgs.lastOrNull() ?: "", ignoreCase = true) }.toMutableList()
+        }.toMutableList()
     }
 }

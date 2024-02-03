@@ -29,13 +29,10 @@ class Interval(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCom
     }
 
     override fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {
-        commandArgs.removeFirstOrNull()
-        val firstArg = commandArgs.removeFirstOrNull() ?: ""
-
-        return if (commandArgs.size < 2) {
+        return if (commandArgs.size < 1) {
             (10..50 step 10).map(Int::toString)
         } else {
             listOf()
-        }.filter { it.contains(firstArg, ignoreCase = true) }.toMutableList()
+        }.toMutableList()
     }
 }
