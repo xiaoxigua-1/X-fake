@@ -59,13 +59,13 @@ abstract class SubCommand {
 
     private fun help(): Component {
         var helpText = Component.text("----------", NamedTextColor.YELLOW)
-                .append(Component.text("Help", TextColor.color(0xffa500)))
-                .append(Component.text("----------\n", NamedTextColor.YELLOW))
-                .append(Component.text("$name command subcommands\n", NamedTextColor.DARK_RED))
+            .append(Component.text("Help", TextColor.color(0xffa500)))
+            .append(Component.text("----------\n", NamedTextColor.YELLOW))
+            .append(Component.text("$name command subcommands\n", NamedTextColor.DARK_RED))
 
         subCommands.forEach { (_, command) ->
             helpText = helpText.append(Component.text(command.name, TextColor.color(0xffa500)))
-                    .append(Component.text(": ${command.description}\n"))
+                .append(Component.text(": ${command.description}\n"))
         }
 
         return helpText

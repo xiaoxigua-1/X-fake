@@ -13,9 +13,13 @@ class Attack(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
         addSubCommand(::Interval)
     }
 
-    override fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+    override fun onCommand(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): Boolean {
         fakePlayers.find { it.displayName == args.first() }?.attack()
-                ?: throw CommandError.CommandFakePlayerNotFound(args.first())
+            ?: throw CommandError.CommandFakePlayerNotFound(args.first())
 
         return true
     }

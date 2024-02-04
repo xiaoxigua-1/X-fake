@@ -9,7 +9,11 @@ class Kill(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
     override val name = "kill"
     override val description = "kill fake player"
 
-    override fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+    override fun onCommand(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): Boolean {
         val name = args.removeFirst()
 
         fakePlayers.find { it.displayName == name }?.kill() ?: throw CommandError.CommandFakePlayerNotFound(name)

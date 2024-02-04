@@ -11,13 +11,17 @@ class TPHere(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
     override val name = "tphere"
     override val description = "tp fake player to your position"
 
-    override fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+    override fun onCommand(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): Boolean {
         val name = args.first()
 
         if (sender is Player) {
             fakePlayers.find { it.displayName == name }
-                    ?.tp(sender.world, Vec3(sender.location.toVector().toVector3f()))
-                    ?: throw CommandError.CommandFakePlayerNotFound(name)
+                ?.tp(sender.world, Vec3(sender.location.toVector().toVector3f()))
+                ?: throw CommandError.CommandFakePlayerNotFound(name)
         }
 
         return true

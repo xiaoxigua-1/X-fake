@@ -98,24 +98,24 @@ class Auto(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
     }
 
     private fun getRecipes(itemStack: ItemStack): List<Map<ItemStack, MutableList<ItemStack>>> {
-            return Bukkit.getServer().getRecipesFor(itemStack).filter { it is ShapedRecipe || it is ShapelessRecipe }
-                .map { recipe ->
-                    val ingredients = mutableListOf<ItemStack>()
+        return Bukkit.getServer().getRecipesFor(itemStack).filter { it is ShapedRecipe || it is ShapelessRecipe }
+            .map { recipe ->
+                val ingredients = mutableListOf<ItemStack>()
 
-                    (if (recipe is ShapedRecipe)
-                        recipe.choiceMap.values
-                    else
-                        (recipe as ShapelessRecipe).choiceList)
-                        .filterNotNull()
-                        .map { (it as RecipeChoice.MaterialChoice).itemStack }
-                        .forEach { item ->
-                            if (ingredients.any { it.type == item.type }) {
-                                ingredients.find { it.type == item.type }!!.amount += 1
-                            } else ingredients.add(item)
-                        }
+                (if (recipe is ShapedRecipe)
+                    recipe.choiceMap.values
+                else
+                    (recipe as ShapelessRecipe).choiceList)
+                    .filterNotNull()
+                    .map { (it as RecipeChoice.MaterialChoice).itemStack }
+                    .forEach { item ->
+                        if (ingredients.any { it.type == item.type }) {
+                            ingredients.find { it.type == item.type }!!.amount += 1
+                        } else ingredients.add(item)
+                    }
 
-                    mapOf(recipe.result to ingredients)
-                }
+                mapOf(recipe.result to ingredients)
+            }
     }
 
     override fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {

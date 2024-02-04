@@ -13,9 +13,9 @@ class Spawn(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComman
     override val description = "spawn new fake player"
 
     override fun onCommand(
-            sender: CommandSender,
-            commandArgs: MutableList<String>,
-            args: MutableList<String>
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
     ): Boolean {
         val name = args.first()
 

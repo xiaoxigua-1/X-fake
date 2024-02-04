@@ -16,7 +16,8 @@ class Look(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
         args: MutableList<String>
     ): Boolean {
         val name = args.first()
-        val fakePlayer = fakePlayers.find { it.displayName == name } ?: throw CommandError.CommandFakePlayerNotFound(name)
+        val fakePlayer =
+            fakePlayers.find { it.displayName == name } ?: throw CommandError.CommandFakePlayerNotFound(name)
 
         if (sender is Player)
             fakePlayer.setRot(sender.location.yaw, sender.location.pitch)

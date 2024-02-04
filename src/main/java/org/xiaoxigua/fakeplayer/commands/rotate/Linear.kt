@@ -8,10 +8,14 @@ class Linear(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
     override val name = "linear"
     override val description = "set fake player rotate at an even speed"
 
-    override fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+    override fun onCommand(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): Boolean {
         val name = args.first()
         val fakePlayer = fakePlayers.find { it.displayName == name }
-                ?: throw CommandError.CommandFakePlayerNotFound(name)
+            ?: throw CommandError.CommandFakePlayerNotFound(name)
         val yaw = getArg(commandArgs)
         val pitch = getArg(commandArgs)
         val task = object : BukkitRunnable() {

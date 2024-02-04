@@ -1,7 +1,9 @@
 package org.xiaoxigua.fakeplayer
 
 import org.bukkit.plugin.java.JavaPlugin
-import org.xiaoxigua.fakeplayer.commands.*
+import org.xiaoxigua.fakeplayer.commands.Kill
+import org.xiaoxigua.fakeplayer.commands.Spawn
+import org.xiaoxigua.fakeplayer.commands.TPHere
 import org.xiaoxigua.fakeplayer.commands.attack.Attack
 import org.xiaoxigua.fakeplayer.commands.craft.Craft
 import org.xiaoxigua.fakeplayer.commands.rotate.Rotate

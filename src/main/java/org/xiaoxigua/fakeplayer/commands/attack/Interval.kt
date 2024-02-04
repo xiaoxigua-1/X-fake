@@ -10,10 +10,14 @@ class Interval(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCom
 
     private val defaultTime = 20
 
-    override fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+    override fun onCommand(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): Boolean {
         val name = args.first()
         val fakePlayer = fakePlayers.find { it.displayName == name }
-                ?: throw CommandError.CommandFakePlayerNotFound(name)
+            ?: throw CommandError.CommandFakePlayerNotFound(name)
         val time = (commandArgs.removeFirstOrNull() ?: defaultTime.toString()).takeIf {
             Regex("\\d+").matches(it)
         }?.toLong() ?: throw CommandError.CommandArgTypeError("Int")

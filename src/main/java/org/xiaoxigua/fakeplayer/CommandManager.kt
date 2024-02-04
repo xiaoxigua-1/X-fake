@@ -14,7 +14,12 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
     private val subCommands = mutableMapOf<String, SubCommand>()
 
     class MainCommandExecutor(private val commandManager: CommandManager) : CommandExecutor {
-        override fun onCommand(sender: CommandSender, command: Command, commandString: String, commandARgs: Array<String>): Boolean {
+        override fun onCommand(
+            sender: CommandSender,
+            command: Command,
+            commandString: String,
+            commandARgs: Array<String>
+        ): Boolean {
             val mutableListArgs = commandARgs.toMutableList()
 
             try {
@@ -25,7 +30,7 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
                     val commandName = mutableListArgs.removeFirst()
 
                     commandManager.subCommands[commandName]?.execute(sender, mutableListArgs, args)
-                            ?: throw CommandError.CommandNotFound(commandName)
+                        ?: throw CommandError.CommandNotFound(commandName)
                 }
 
             } catch (commandError: Exception) {
@@ -37,12 +42,12 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
 
         private fun help(): Component {
             var helpText = Component.text("----------", NamedTextColor.YELLOW)
-                    .append(Component.text("Help", TextColor.color(0xffa500)))
-                    .append(Component.text("----------\n", NamedTextColor.YELLOW))
+                .append(Component.text("Help", TextColor.color(0xffa500)))
+                .append(Component.text("----------\n", NamedTextColor.YELLOW))
 
             commandManager.subCommands.forEach { (_, command) ->
                 helpText = helpText.append(Component.text(command.name, TextColor.color(0xffa500)))
-                        .append(Component.text(": ${command.description}\n"))
+                    .append(Component.text(": ${command.description}\n"))
             }
 
             return helpText
@@ -52,10 +57,10 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
 
     class MainCommandTabCompleter(private val commandManager: CommandManager) : TabCompleter {
         override fun onTabComplete(
-                sender: CommandSender,
-                command: Command,
-                string: String,
-                args: Array<String>
+            sender: CommandSender,
+            command: Command,
+            string: String,
+            args: Array<String>
         ): MutableList<String> {
             val mutableListArgs = args.toMutableList()
             mutableListArgs.removeFirst()
@@ -66,7 +71,8 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
                 val firstArg = mutableListArgs.removeFirst()
 
                 commandManager.subCommands[firstArg]?.tabComplete(sender, mutableListArgs)
-                        ?: commandManager.subCommands.keys.filter { it.contains(firstArg, ignoreCase = true) }.toMutableList()
+                    ?: commandManager.subCommands.keys.filter { it.contains(firstArg, ignoreCase = true) }
+                        .toMutableList()
             }
         }
     }

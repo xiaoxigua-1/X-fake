@@ -10,10 +10,14 @@ class Stop(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
     override val name = "stop"
     override val description = "stop all attack task"
 
-    override fun onCommand(sender: CommandSender, commandArgs: MutableList<String>, args: MutableList<String>): Boolean {
+    override fun onCommand(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): Boolean {
         val name = args.first()
         val fakePlayer = fakePlayers.find { it.displayName == name }
-                ?: throw CommandError.CommandFakePlayerNotFound(name)
+            ?: throw CommandError.CommandFakePlayerNotFound(name)
 
         fakePlayer.taskManager.removeTask(FakePlayerTask.TaskType.Attack)
 
