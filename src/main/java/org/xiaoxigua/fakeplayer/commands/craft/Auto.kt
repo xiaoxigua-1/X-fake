@@ -23,14 +23,16 @@ class Auto(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
         args: MutableList<String>
     ): Boolean {
         val name = args.first()
+        val itemName = commandArgs.firstOrNull() ?: throw CommandError.CommandMissingArg("Item")
         val fakePlayer =
             fakePlayers.find { it.displayName == name } ?: throw CommandError.CommandFakePlayerNotFound(name)
-        val item = commandArgs.firstOrNull() ?: throw CommandError.CommandMissingArg("Item")
+        val item =
+            itemName.takeIf { items.contains(it) }
+                ?: throw CommandError.CommandItemNotFound(itemName)
+        val itemStack = ItemStack(Material.getMaterial(item.uppercase())!!)
+        val recipes = getRecipes(itemStack)
 
-        if (items.contains(item)) {
-            val itemStack = ItemStack(Material.getMaterial(item.uppercase())!!)
-            val recipes = getRecipes(itemStack)
-
+        if (recipes.isNotEmpty()) {
             val task = object : BukkitRunnable() {
                 override fun run() {
                     recipes.forEach { recipe ->
@@ -90,7 +92,7 @@ class Auto(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
             }.runTaskTimer(FakePlayerPlugin.currentPlugin!!, 0L, 2L)
 
             fakePlayer.taskManager.addTask(FakePlayerTask.TaskType.Craft, task)
-        } else throw CommandError.CommandItemNotFound(item)
+        } else throw CommandError.CommandItemCantCraft(item)
 
         return true
     }
