@@ -7,7 +7,7 @@ import org.xiaoxigua.fakeplayer.FakePlayerEntity
 import org.xiaoxigua.fakeplayer.SubCommand
 
 class Look(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
-    override val name = "rotate"
+    override val name = "look"
     override val description = "set fake player self look at"
 
     override fun onCommand(
