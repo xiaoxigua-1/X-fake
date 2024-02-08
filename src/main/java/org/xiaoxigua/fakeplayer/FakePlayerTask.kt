@@ -6,7 +6,8 @@ class FakePlayerTask {
     enum class TaskType {
         Attack,
         Rotate,
-        Craft
+        Craft,
+        Place,
     }
 
     private val tasks: MutableMap<TaskType, BukkitTask> = mutableMapOf()

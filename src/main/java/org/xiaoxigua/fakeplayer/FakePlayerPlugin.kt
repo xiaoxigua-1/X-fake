@@ -5,8 +5,9 @@ import org.xiaoxigua.fakeplayer.commands.Kill
 import org.xiaoxigua.fakeplayer.commands.Spawn
 import org.xiaoxigua.fakeplayer.commands.TPHere
 import org.xiaoxigua.fakeplayer.commands.attack.Attack
-import org.xiaoxigua.fakeplayer.commands.attack.Stop
+import org.xiaoxigua.fakeplayer.commands.Stop
 import org.xiaoxigua.fakeplayer.commands.craft.Craft
+import org.xiaoxigua.fakeplayer.commands.place.Place
 import org.xiaoxigua.fakeplayer.commands.rotate.Rotate
 import org.xiaoxigua.fakeplayer.events.FakePlayerInWorldEvent
 
@@ -21,7 +22,7 @@ class FakePlayerPlugin : JavaPlugin() {
         val commandManager = CommandManager("fake", fakePlayers)
 
         currentPlugin = this
-        commandManager.addSubCommand(::Spawn, ::Kill, ::TPHere, ::Attack, ::Rotate, ::Craft, ::Stop)
+        commandManager.addSubCommand(::Spawn, ::Kill, ::TPHere, ::Attack, ::Rotate, ::Craft, ::Stop, ::Place)
         server.pluginManager.registerEvents(FakePlayerInWorldEvent(fakePlayers), this)
         server.scheduler.scheduleSyncRepeatingTask(this, {
             fakePlayers.forEach {

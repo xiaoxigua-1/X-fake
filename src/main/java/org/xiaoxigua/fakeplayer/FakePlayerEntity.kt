@@ -9,16 +9,15 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.world.phys.Vec3
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Server
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.craftbukkit.v1_20_R3.CraftServer
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerRespawnEvent
+import org.bukkit.util.BlockIterator
+import org.bukkit.util.BoundingBox
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
 
 class FakePlayerEntity(
@@ -95,15 +94,27 @@ class FakePlayerEntity(
         )
     }
 
-    private fun sendFakePlayerAttackAnimation(connection: ServerGamePacketListenerImpl) {
+    private fun sendFakePlayerSwingMainArmAnimation(connection: ServerGamePacketListenerImpl) {
         connection.send(ClientboundAnimatePacket(bukkitEntity.handleRaw!!, 0))
     }
 
     private fun sendAllPlayerPacket(vararg sendPacket: (ServerGamePacketListenerImpl) -> Unit) {
-        Bukkit.getOnlinePlayers().forEach {
-            val connection = (it as CraftPlayer).handle.connection
+        sendAllPlayerPacket(Bukkit.getOnlinePlayers(), *sendPacket)
+    }
 
-            sendPacket.forEach {
+    private fun sendNearPlayerPacket(vararg sendPacket: (ServerGamePacketListenerImpl) -> Unit) {
+        val location = bukkitEntity.location
+        sendAllPlayerPacket(bukkitEntity.world.getNearbyPlayers(location, 160.0, 320.0, 160.0), *sendPacket)
+    }
+
+    private fun sendAllPlayerPacket(
+        players: Collection<Player>,
+        vararg sendPaket: (ServerGamePacketListenerImpl) -> Unit
+    ) {
+        players.forEach { player ->
+            val connection = (player as CraftPlayer).handle.connection
+
+            sendPaket.forEach {
                 it(connection)
             }
         }
@@ -139,7 +150,45 @@ class FakePlayerEntity(
 
         if (attackTarget != null) {
             attack((attackTarget as CraftEntity).handle)
-            sendAllPlayerPacket(::sendFakePlayerAttackAnimation)
+            sendNearPlayerPacket(::sendFakePlayerSwingMainArmAnimation)
         }
+    }
+
+    fun place(blockType: Material) {
+        val blockIterator = BlockIterator(bukkitEntity, 4)
+        val distancesBlock = mutableListOf(blockIterator.next())
+        val world = bukkitEntity.world
+        var lastBlock: Location? = null
+
+        while (blockIterator.hasNext()) {
+            distancesBlock.add(blockIterator.next())
+        }
+
+
+        for (index in 2..<distancesBlock.size) {
+            println("${distancesBlock[index].location} ${distancesBlock[index].boundingBox}")
+            if (!distancesBlock[index].type.isAir) {
+                if (distancesBlock[index - 1].type.isAir)
+                    lastBlock = distancesBlock[index - 1].location
+                break
+            }
+        }
+
+        if (lastBlock != null && blockType.isBlock && world.getNearbyEntities(
+                BoundingBox(
+                    lastBlock.x,
+                    lastBlock.y,
+                    lastBlock.z,
+                    lastBlock.x + 1,
+                    lastBlock.y + 1,
+                    lastBlock.z + 1
+                )
+            ).isEmpty()
+        ) {
+            inventory.getSelected().count -= 1
+            world.getBlockAt(lastBlock).type = blockType
+        }
+
+        sendNearPlayerPacket(::sendFakePlayerSwingMainArmAnimation)
     }
 }

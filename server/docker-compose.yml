@@ -8,7 +8,7 @@ services:
       VERSION: 1.20.4
       EULA: "TRUE"
     volumes:
-      - "./plugins:/plugins"
+      - "./plugins:/data/plugins"
     restart: always
     ports:
       - "25565:25565"
