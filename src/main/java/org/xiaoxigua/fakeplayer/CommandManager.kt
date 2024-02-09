@@ -9,7 +9,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 
-class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlayerEntity>) {
+class CommandManager(val commandName: String, val fakePlayers: MutableList<FakePlayerEntity>) {
     private val mainCommand = Bukkit.getPluginCommand(commandName)
     private val subCommands = mutableMapOf<String, SubCommand>()
 
@@ -43,6 +43,11 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
         private fun help(): Component {
             var helpText = Component.text("----------", NamedTextColor.YELLOW)
                 .append(Component.text("Help", TextColor.color(0xffa500)))
+                .append(Component.text("----------\n", NamedTextColor.YELLOW))
+                .append(Component.text("Usage: /$${commandManager.commandName} {fake player name} [subcommand]\n", TextColor.color(0xffa500)))
+                .append(Component.text("--------------------\n", NamedTextColor.YELLOW))
+                .append(Component.text("----------", NamedTextColor.YELLOW))
+                .append(Component.text("Subcommands", TextColor.color(0xffa500)))
                 .append(Component.text("----------\n", NamedTextColor.YELLOW))
 
             commandManager.subCommands.forEach { (_, command) ->
