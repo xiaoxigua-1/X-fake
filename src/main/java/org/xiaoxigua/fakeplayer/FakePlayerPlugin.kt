@@ -1,10 +1,7 @@
 package org.xiaoxigua.fakeplayer
 
 import org.bukkit.plugin.java.JavaPlugin
-import org.xiaoxigua.fakeplayer.commands.Kill
-import org.xiaoxigua.fakeplayer.commands.Spawn
-import org.xiaoxigua.fakeplayer.commands.Stop
-import org.xiaoxigua.fakeplayer.commands.TPHere
+import org.xiaoxigua.fakeplayer.commands.*
 import org.xiaoxigua.fakeplayer.commands.attack.Attack
 import org.xiaoxigua.fakeplayer.commands.breaking.BreakBlock
 import org.xiaoxigua.fakeplayer.commands.craft.Craft
@@ -34,7 +31,8 @@ class FakePlayerPlugin : JavaPlugin() {
             ::Stop,
             ::Place,
             ::BreakBlock,
-            ::Inventory
+            ::Inventory,
+            ::Riding
         )
         server.pluginManager.registerEvents(FakePlayerInWorldEvent(fakePlayers), this)
         server.scheduler.scheduleSyncRepeatingTask(this, {

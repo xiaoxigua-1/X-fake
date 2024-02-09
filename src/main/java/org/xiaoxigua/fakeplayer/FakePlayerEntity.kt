@@ -242,4 +242,24 @@ class FakePlayerEntity(
 
         return task
     }
+
+    fun riding() {
+        val iterator = BlockIterator(bukkitEntity, 4)
+
+        for (block in iterator) {
+            if (block.type.isAir) {
+                bukkitEntity.world.getNearbyEntities(
+                    BoundingBox(
+                        block.location.x,
+                        block.location.y,
+                        block.location.z,
+                        block.location.x + 1,
+                        block.location.y + 1,
+                        block.location.z + 1
+                    )
+                ).takeIf { it.isNotEmpty() }?.iterator()?.next()?.addPassenger(bukkitEntity) ?: continue
+                break
+            } else break
+        }
+    }
 }
