@@ -45,7 +45,6 @@ class CommandManager(val commandName: String, val fakePlayers: MutableList<FakeP
                 .append(Component.text("Help", TextColor.color(0xffa500)))
                 .append(Component.text("----------\n", NamedTextColor.YELLOW))
                 .append(Component.text("Usage: /$${commandManager.commandName} {fake player name} [subcommand]\n", TextColor.color(0xffa500)))
-                .append(Component.text("--------------------\n", NamedTextColor.YELLOW))
                 .append(Component.text("----------", NamedTextColor.YELLOW))
                 .append(Component.text("Subcommands", TextColor.color(0xffa500)))
                 .append(Component.text("----------\n", NamedTextColor.YELLOW))
