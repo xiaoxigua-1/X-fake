@@ -118,7 +118,11 @@ class Auto(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
             }
     }
 
-    override fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {
+    override fun onTabComplete(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): MutableList<String> {
         return items.toMutableList()
     }
 }

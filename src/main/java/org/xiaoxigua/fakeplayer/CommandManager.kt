@@ -70,7 +70,7 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
             } else {
                 val firstArg = mutableListArgs.removeFirst()
 
-                commandManager.subCommands[firstArg]?.tabComplete(sender, mutableListArgs)
+                commandManager.subCommands[firstArg]?.tabComplete(sender, mutableListArgs, mutableListOf(name))
                     ?: commandManager.subCommands.keys.filter { it.contains(firstArg, ignoreCase = true) }
                         .toMutableList()
             }

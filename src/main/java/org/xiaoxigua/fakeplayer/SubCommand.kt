@@ -16,7 +16,11 @@ abstract class SubCommand {
         return true
     }
 
-    open fun onTabComplete(sender: CommandSender, commandArgs: MutableList<String>): MutableList<String> {
+    open fun onTabComplete(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): MutableList<String> {
         return subCommands.keys.toMutableList()
     }
 
@@ -47,12 +51,21 @@ abstract class SubCommand {
         }
     }
 
-    fun tabComplete(sender: CommandSender, args: MutableList<String>): MutableList<String>? {
-        val firstArg = args.removeFirstOrNull()
+    fun tabComplete(
+        sender: CommandSender,
+        commandArgs: MutableList<String>,
+        args: MutableList<String>
+    ): MutableList<String>? {
+        val firstArg = commandArgs.removeFirstOrNull()
 
         return if (firstArg != null)
-            subCommands[firstArg]?.tabComplete(sender, args)
-                ?: onTabComplete(sender, args).filter { it.contains(args.lastOrNull() ?: firstArg, ignoreCase = true) }
+            subCommands[firstArg]?.tabComplete(sender, commandArgs, args)
+                ?: onTabComplete(sender, commandArgs, args).filter {
+                    it.contains(
+                        commandArgs.lastOrNull() ?: firstArg,
+                        ignoreCase = true
+                    )
+                }
                     .toMutableList()
         else null
     }
