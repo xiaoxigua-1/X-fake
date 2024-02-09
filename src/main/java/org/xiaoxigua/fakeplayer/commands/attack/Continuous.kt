@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.scheduler.BukkitRunnable
 import org.xiaoxigua.fakeplayer.*
 
-class Interval(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
+class Continuous(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
     override val name = "interval"
     override val description = "set periodic attack"
 

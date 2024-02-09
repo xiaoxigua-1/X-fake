@@ -10,6 +10,10 @@ class BreakBlock(override val fakePlayers: MutableList<FakePlayerEntity>) : SubC
     override val name = "break"
     override val description = "set fake player breaking action"
 
+    init {
+        addSubCommand(::Continuous)
+    }
+
     override fun onCommand(
         sender: CommandSender,
         commandArgs: MutableList<String>,

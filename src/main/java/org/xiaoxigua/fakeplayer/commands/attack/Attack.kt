@@ -10,7 +10,7 @@ class Attack(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
     override val description = "set fake player attack action"
 
     init {
-        addSubCommand(::Interval)
+        addSubCommand(::Continuous)
     }
 
     override fun onCommand(

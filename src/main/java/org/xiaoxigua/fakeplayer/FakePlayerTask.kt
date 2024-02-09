@@ -9,12 +9,17 @@ class FakePlayerTask {
         Craft,
         Place,
         Breaking,
+        ContinuousBreaking,
     }
 
     private val tasks: MutableMap<TaskType, BukkitTask> = mutableMapOf()
     fun addTask(type: TaskType, task: BukkitTask) {
         tasks[type]?.cancel()
         tasks[type] = task
+    }
+
+    fun getTask(type: TaskType): BukkitTask? {
+        return tasks[type]
     }
 
     fun removeTask(type: TaskType) {
