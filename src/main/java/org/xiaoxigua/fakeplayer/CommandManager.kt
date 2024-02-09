@@ -63,10 +63,10 @@ class CommandManager(commandName: String, val fakePlayers: MutableList<FakePlaye
             args: Array<String>
         ): MutableList<String> {
             val mutableListArgs = args.toMutableList()
-            mutableListArgs.removeFirst()
+            val name = mutableListArgs.removeFirst()
 
             return if (args.size <= 1) {
-                commandManager.fakePlayers.map { it.displayName }.plus(listOf("Alex", "Fake_Player")).toMutableList()
+                commandManager.fakePlayers.map { it.displayName }.plus(listOf("Alex", "Fake_Player")).filter { it.contains(name, ignoreCase = true) }.toMutableList()
             } else {
                 val firstArg = mutableListArgs.removeFirst()
 
