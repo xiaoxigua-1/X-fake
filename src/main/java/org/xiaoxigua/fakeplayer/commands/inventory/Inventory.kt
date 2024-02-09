@@ -5,7 +5,6 @@ import org.bukkit.entity.Player
 import org.xiaoxigua.fakeplayer.CommandError
 import org.xiaoxigua.fakeplayer.FakePlayerEntity
 import org.xiaoxigua.fakeplayer.SubCommand
-import org.xiaoxigua.fakeplayer.commands.inventory.dropItem.DropItem
 
 class Inventory(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
     override val name = "inventory"

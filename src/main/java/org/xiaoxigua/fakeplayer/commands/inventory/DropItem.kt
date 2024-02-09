@@ -1,4 +1,4 @@
-package org.xiaoxigua.fakeplayer.commands.inventory.dropItem
+package org.xiaoxigua.fakeplayer.commands.inventory
 
 import net.minecraft.world.item.ItemStack
 import org.bukkit.command.CommandSender
