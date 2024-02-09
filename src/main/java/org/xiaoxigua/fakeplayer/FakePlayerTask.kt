@@ -8,6 +8,7 @@ class FakePlayerTask {
         Rotate,
         Craft,
         Place,
+        Breaking,
     }
 
     private val tasks: MutableMap<TaskType, BukkitTask> = mutableMapOf()

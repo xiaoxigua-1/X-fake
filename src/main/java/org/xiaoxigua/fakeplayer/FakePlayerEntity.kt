@@ -1,6 +1,7 @@
 package org.xiaoxigua.fakeplayer
 
 import com.mojang.authlib.GameProfile
+import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.PacketFlow
 import net.minecraft.network.protocol.game.*
@@ -10,12 +11,15 @@ import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.world.phys.Vec3
 import org.bukkit.*
+import org.bukkit.block.Block
 import org.bukkit.craftbukkit.v1_20_R3.CraftServer
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerRespawnEvent
+import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.BlockIterator
 import org.bukkit.util.BoundingBox
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
@@ -96,6 +100,10 @@ class FakePlayerEntity(
 
     private fun sendFakePlayerSwingMainArmAnimation(connection: ServerGamePacketListenerImpl) {
         connection.send(ClientboundAnimatePacket(bukkitEntity.handleRaw!!, 0))
+    }
+
+    private fun sendFakePlayerBreakBlockAnimation(connection: ServerGamePacketListenerImpl, pos: BlockPos, progress: Int) {
+        connection.send(ClientboundBlockDestructionPacket(id, pos, progress))
     }
 
     private fun sendAllPlayerPacket(vararg sendPacket: (ServerGamePacketListenerImpl) -> Unit) {
@@ -190,5 +198,48 @@ class FakePlayerEntity(
         }
 
         sendNearPlayerPacket(::sendFakePlayerSwingMainArmAnimation)
+    }
+
+    fun breaking(): BukkitTask {
+        var breakBlock: Block? = null
+        var progress = 0f
+        var lastProgress = 0
+        val task = object : BukkitRunnable() {
+            override fun run() {
+                val blockIterator = BlockIterator(bukkitEntity, 4)
+
+                while (blockIterator.hasNext()) {
+                    val nextBlock = blockIterator.next()
+
+                    if (!nextBlock.type.isAir && (breakBlock == null || breakBlock?.type == nextBlock.type)) {
+                        breakBlock = nextBlock
+                        break
+                    } else if (!nextBlock.type.isAir && breakBlock?.type != nextBlock.type) {
+                        breakBlock = null
+                        break
+                    }
+                }
+
+                progress += breakBlock?.getBreakSpeed(bukkitEntity) ?: 0f
+                sendNearPlayerPacket(::sendFakePlayerSwingMainArmAnimation)
+
+                // send block breaking animation packet to near players
+                if (breakBlock != null && (progress * 10).toInt() > lastProgress) {
+                    lastProgress = (progress * 10).toInt()
+                    sendNearPlayerPacket({ connection ->
+                        sendFakePlayerBreakBlockAnimation(connection, BlockPos(breakBlock!!.x, breakBlock!!.y, breakBlock!!.z), lastProgress)
+                    })
+                }
+
+                if (progress >= 1f) {
+                    breakBlock?.breakNaturally(inventory.getSelected().bukkitStack)
+                    cancel()
+                } else if (breakBlock == null) {
+                    cancel()
+                }
+            }
+        }.runTaskTimer(FakePlayerPlugin.currentPlugin!!, 0L, 1L)
+
+        return task
     }
 }

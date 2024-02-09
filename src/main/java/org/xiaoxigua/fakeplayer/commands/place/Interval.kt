@@ -25,7 +25,7 @@ class Interval(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCom
                 if (selectedItem != ItemStack.EMPTY && selectedItem.bukkitStack.type.isBlock)
                     fakePlayer.place(selectedItem.bukkitStack.type)
             }
-        }.runTaskTimer(FakePlayerPlugin.currentPlugin!!, 0L, 10L)
+        }.runTaskTimer(FakePlayerPlugin.currentPlugin!!, 0L, 5L)
 
         fakePlayer.taskManager.addTask(FakePlayerTask.TaskType.Place, task)
 
