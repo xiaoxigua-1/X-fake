@@ -32,7 +32,7 @@ permissions:
 
   fake-player.normal:
     description: Allows usage of the /fake command
-    default-permission: true
+    default: true
 
   fake-player.op:
     description: Allows usage of the op command
