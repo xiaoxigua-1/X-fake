@@ -17,12 +17,15 @@ import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.entity.Player
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent
+import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.BlockIterator
 import org.bukkit.util.BoundingBox
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
+import java.net.InetAddress
 
 class FakePlayerEntity(
     server: Server,
@@ -43,10 +46,12 @@ class FakePlayerEntity(
             this,
             CommonListenerCookie(gameProfile, 0, clientInfo)
         ) {
-            override fun send(packet: Packet<*>) {
-            }
+            override fun send(packet: Packet<*>) {}
         }
 
+        triggerPlayerLoginEvent()
+
+        // add fake player to server player list
         server.playerList.placeNewPlayer(
             EmptyConnection(PacketFlow.CLIENTBOUND),
             this,
@@ -63,6 +68,23 @@ class FakePlayerEntity(
         addTag("fakePlayer")
         setLoadViewDistance(10)
         sendAllPlayerPacket(::sendFakePlayerPacket)
+    }
+
+    // trigger player join event
+    private fun triggerPlayerLoginEvent() {
+        val bukkitScheduler = Bukkit.getScheduler()
+
+        bukkitScheduler.runTaskAsynchronously(FakePlayerPlugin.currentPlugin!!) { _ ->
+            val hostName = "0.0.0.0"
+            val inetAddress = InetAddress.getByName(hostName)
+            val pluginManager = Bukkit.getPluginManager()
+
+            pluginManager
+                .callEvent(AsyncPlayerPreLoginEvent(displayName, inetAddress, uuid))
+            bukkitScheduler.runTask(FakePlayerPlugin.currentPlugin!!) { _ ->
+                pluginManager.callEvent(PlayerLoginEvent(bukkitEntity.player!!, hostName, inetAddress))
+            }
+        }
     }
 
     fun sendFakePlayerPacket(player: Player) {
@@ -247,7 +269,12 @@ class FakePlayerEntity(
         val iterator = BlockIterator(bukkitEntity, 4)
 
         for (block in iterator) {
-            if (block.type.isAir) {
+            if (block.type.isAir || listOf(
+                    block.boundingBox.widthX,
+                    block.boundingBox.widthZ,
+                    block.boundingBox.height
+                ).any { it < 1 }
+            ) {
                 bukkitEntity.world.getNearbyEntities(
                     BoundingBox(
                         block.location.x,
@@ -257,7 +284,8 @@ class FakePlayerEntity(
                         block.location.y + 1,
                         block.location.z + 1
                     )
-                ).takeIf { it.isNotEmpty() }?.iterator()?.next()?.addPassenger(bukkitEntity) ?: continue
+                ).takeIf { it.isNotEmpty() }?.iterator()?.next()?.takeIf { it.entityId != id }
+                    ?.addPassenger(bukkitEntity) ?: continue
                 break
             } else break
         }

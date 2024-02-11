@@ -46,8 +46,8 @@ jar {
     }
 }
 
-build {
-    dependsOn reobfJar
+jar {
+    finalizedBy reobfJar
 }
 
 processResources {
@@ -68,6 +68,6 @@ tasks.register('copyToServer', Copy) {
     into layout.projectDirectory.dir("server/plugins")
 }
 
-tasks.named("build") {
+tasks.named("reobfJar") {
     finalizedBy("copyToServer")
 }
