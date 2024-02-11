@@ -7,7 +7,7 @@ import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.PacketFlow
 import java.net.SocketAddress
 
-class EmptyConnection(flag: PacketFlow?) : Connection(flag) {
+class EmptyConnection(flag: PacketFlow) : Connection(flag) {
     init {
         channel = EmptyChannel(null)
         address = object : SocketAddress() {
@@ -15,21 +15,17 @@ class EmptyConnection(flag: PacketFlow?) : Connection(flag) {
         }
     }
 
-    override fun flushChannel() {
-    }
+    override fun flushChannel() {}
 
     override fun isConnected(): Boolean {
         return true
     }
 
-    override fun send(packet: Packet<*>?) {
-    }
+    override fun send(packet: Packet<*>) {}
 
-    override fun send(packet: Packet<*>?, genericfuturelistener: PacketSendListener?) {
-    }
+    override fun send(packet: Packet<*>, genericfuturelistener: PacketSendListener?) {}
 
-    override fun send(packet: Packet<*>?, genericfuturelistener: PacketSendListener?, flag: Boolean) {
-    }
+    override fun send(packet: Packet<*>, genericfuturelistener: PacketSendListener?, flag: Boolean) {}
 
     override fun setListener(pl: PacketListener) {
         try {
