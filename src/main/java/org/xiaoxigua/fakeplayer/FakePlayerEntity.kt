@@ -196,9 +196,9 @@ class FakePlayerEntity(
 
 
         for (index in 2..<distancesBlock.size) {
-            println("${distancesBlock[index].location} ${distancesBlock[index].boundingBox}")
-            if (!distancesBlock[index].type.isAir) {
-                if (distancesBlock[index - 1].type.isAir)
+            println("${distancesBlock[index]}")
+            if (!distancesBlock[index].isPassable && !distancesBlock[index].isEmpty && !distancesBlock[index].isLiquid) {
+                if (distancesBlock[index - 1].canPlace(blockType.createBlockData()))
                     lastBlock = distancesBlock[index - 1].location
                 break
             }
