@@ -16,6 +16,7 @@ import org.bukkit.craftbukkit.v1_20_R3.CraftServer
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerLoginEvent
@@ -124,7 +125,11 @@ class FakePlayerEntity(
         connection.send(ClientboundAnimatePacket(bukkitEntity.handleRaw!!, 0))
     }
 
-    private fun sendFakePlayerBreakBlockAnimation(connection: ServerGamePacketListenerImpl, pos: BlockPos, progress: Int) {
+    private fun sendFakePlayerBreakBlockAnimation(
+        connection: ServerGamePacketListenerImpl,
+        pos: BlockPos,
+        progress: Int
+    ) {
         connection.send(ClientboundBlockDestructionPacket(id, pos, progress))
     }
 
@@ -134,7 +139,7 @@ class FakePlayerEntity(
 
     private fun sendNearPlayerPacket(vararg sendPacket: (ServerGamePacketListenerImpl) -> Unit) {
         val location = bukkitEntity.location
-        sendAllPlayerPacket(bukkitEntity.world.getNearbyPlayers(location, 160.0, 320.0, 160.0), *sendPacket)
+        sendAllPlayerPacket(bukkitEntity.world.getNearbyPlayers(location, 80.0, 160.0, 80.0), *sendPacket)
     }
 
     private fun sendAllPlayerPacket(
@@ -196,7 +201,6 @@ class FakePlayerEntity(
 
 
         for (index in 2..<distancesBlock.size) {
-            println("${distancesBlock[index]}")
             if (!distancesBlock[index].isPassable && !distancesBlock[index].isEmpty && !distancesBlock[index].isLiquid) {
                 if (distancesBlock[index - 1].canPlace(blockType.createBlockData()))
                     lastBlock = distancesBlock[index - 1].location
@@ -249,7 +253,11 @@ class FakePlayerEntity(
                 if (breakBlock != null && (progress * 10).toInt() > lastProgress) {
                     lastProgress = (progress * 10).toInt()
                     sendNearPlayerPacket({ connection ->
-                        sendFakePlayerBreakBlockAnimation(connection, BlockPos(breakBlock!!.x, breakBlock!!.y, breakBlock!!.z), lastProgress)
+                        sendFakePlayerBreakBlockAnimation(
+                            connection,
+                            BlockPos(breakBlock!!.x, breakBlock!!.y, breakBlock!!.z),
+                            lastProgress
+                        )
                     })
                 }
 
@@ -275,7 +283,7 @@ class FakePlayerEntity(
                     block.boundingBox.height
                 ).any { it < 1 }
             ) {
-                bukkitEntity.world.getNearbyEntities(
+                for (entity in bukkitEntity.world.getNearbyEntities(
                     BoundingBox(
                         block.location.x,
                         block.location.y,
@@ -284,10 +292,29 @@ class FakePlayerEntity(
                         block.location.y + 1,
                         block.location.z + 1
                     )
-                ).takeIf { it.isNotEmpty() }?.iterator()?.next()?.takeIf { it.entityId != id }
-                    ?.addPassenger(bukkitEntity) ?: continue
-                break
-            } else break
+                )) {
+                    when (entity.type) {
+                        EntityType.MINECART,
+                        EntityType.BOAT,
+                        EntityType.HORSE,
+                        EntityType.ZOMBIE_HORSE,
+                        EntityType.SKELETON_HORSE,
+                        EntityType.DONKEY,
+                        EntityType.CAMEL,
+                        EntityType.LLAMA,
+                        EntityType.TRADER_LLAMA,
+                        EntityType.PIG,
+                        EntityType.STRIDER,
+                        EntityType.MULE,
+                        EntityType.CHEST_BOAT -> entity.addPassenger(
+                            bukkitEntity
+                        )
+
+                        else -> continue
+                    }
+                }
+            }
+            break
         }
     }
 }
