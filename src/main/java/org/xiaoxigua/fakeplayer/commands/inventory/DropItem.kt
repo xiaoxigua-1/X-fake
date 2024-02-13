@@ -29,10 +29,11 @@ class DropItem(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCom
                     }
                 }
             }
-        } else fakePlayer.inventory.items.find { it.bukkitStack.type.toString() == arg && !it.bukkitStack.type.isAir }.let {
-            fakePlayer.drop(it!!, false, false)
-            fakePlayer.inventory.removeItem(it)
-        }
+        } else fakePlayer.inventory.items.find { it.bukkitStack.type.toString() == arg && !it.bukkitStack.type.isAir }
+            .let {
+                fakePlayer.drop(it!!, false, false)
+                fakePlayer.inventory.removeItem(it)
+            }
 
         return true
     }
@@ -44,7 +45,9 @@ class DropItem(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCom
     ): MutableList<String> {
         val name = args.first()
         val fakePlayer = fakePlayers.find { it.displayName == name }
-        val items = fakePlayer?.inventory?.items?.filter { !it.bukkitStack.type.isAir }?.map { it.bukkitStack.type.toString() } ?: listOf()
+        val items =
+            fakePlayer?.inventory?.items?.filter { !it.bukkitStack.type.isAir }?.map { it.bukkitStack.type.toString() }
+                ?: listOf()
 
         return listOf("all").plus(items).toMutableList()
     }

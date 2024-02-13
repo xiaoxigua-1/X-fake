@@ -44,7 +44,12 @@ class CommandManager(val commandName: String, val fakePlayers: MutableList<FakeP
             var helpText = Component.text("----------", NamedTextColor.YELLOW)
                 .append(Component.text("Help", TextColor.color(0xffa500)))
                 .append(Component.text("----------\n", NamedTextColor.YELLOW))
-                .append(Component.text("Usage: /$${commandManager.commandName} {fake player name} [subcommand]\n", TextColor.color(0xffa500)))
+                .append(
+                    Component.text(
+                        "Usage: /$${commandManager.commandName} {fake player name} [subcommand]\n",
+                        TextColor.color(0xffa500)
+                    )
+                )
                 .append(Component.text("----------", NamedTextColor.YELLOW))
                 .append(Component.text("Subcommands", TextColor.color(0xffa500)))
                 .append(Component.text("----------\n", NamedTextColor.YELLOW))
@@ -70,7 +75,8 @@ class CommandManager(val commandName: String, val fakePlayers: MutableList<FakeP
             val name = mutableListArgs.removeFirst()
 
             return if (args.size <= 1) {
-                commandManager.fakePlayers.map { it.displayName }.plus(listOf("Alex", "Fake_Player")).filter { it.contains(name, ignoreCase = true) }.toMutableList()
+                commandManager.fakePlayers.map { it.displayName }.plus(listOf("Alex", "Fake_Player"))
+                    .filter { it.contains(name, ignoreCase = true) }.toMutableList()
             } else {
                 val firstArg = mutableListArgs.removeFirst()
 

@@ -13,6 +13,7 @@ import org.xiaoxigua.fakeplayer.events.FakePlayerInWorldEvent
 
 class FakePlayerPlugin : JavaPlugin() {
     private val fakePlayers = mutableListOf<FakePlayerEntity>()
+
     companion object {
         var currentPlugin: JavaPlugin? = null
         val logger = Bukkit.getLogger()

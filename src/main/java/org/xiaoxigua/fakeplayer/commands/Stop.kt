@@ -1,7 +1,9 @@
 package org.xiaoxigua.fakeplayer.commands
 
 import org.bukkit.command.CommandSender
-import org.xiaoxigua.fakeplayer.*
+import org.xiaoxigua.fakeplayer.CommandError
+import org.xiaoxigua.fakeplayer.FakePlayerEntity
+import org.xiaoxigua.fakeplayer.SubCommand
 
 class Stop(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
     override val name = "stop"
