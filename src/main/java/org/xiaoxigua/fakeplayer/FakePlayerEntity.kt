@@ -1,5 +1,7 @@
 package org.xiaoxigua.fakeplayer
 
+import com.destroystokyo.paper.profile.ProfileProperty
+import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.Packet
@@ -26,7 +28,11 @@ import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.BlockIterator
 import org.bukkit.util.BoundingBox
 import org.xiaoxigua.fakeplayer.network.EmptyConnection
+import java.io.InputStreamReader
 import java.net.InetAddress
+import java.net.URL
+import java.util.logging.Level
+
 
 class FakePlayerEntity(
     server: Server,
@@ -37,6 +43,8 @@ class FakePlayerEntity(
 
     private val world = (world as CraftWorld).handle
     val taskManager = FakePlayerTask()
+    private val mojangApiURI = "https://api.mojang.com/"
+    private val mojangSessionApiURI = "https://sessionserver.mojang.com"
 
     fun spawn(spawnWorld: World, location: Location) {
         val spawnServerLevel = (spawnWorld as CraftWorld).handle
@@ -52,13 +60,19 @@ class FakePlayerEntity(
 
         triggerPlayerLoginEvent()
 
+        try {
+            setTexture()
+        } catch (e: Exception) {
+            FakePlayerPlugin.logger.log(Level.WARNING, e.message)
+        }
+
         // add fake player to server player list
         server.playerList.placeNewPlayer(
             EmptyConnection(PacketFlow.CLIENTBOUND),
             this,
             CommonListenerCookie.createInitial(gameProfile)
         )
-        server.playerList.respawn(this, false, PlayerRespawnEvent.RespawnReason.DEATH)
+        server.playerList.respawn(this, false, PlayerRespawnEvent.RespawnReason.PLUGIN)
 
         world.removePlayerImmediately(this, RemovalReason.CHANGED_DIMENSION)
         unsetRemoved()
@@ -86,6 +100,27 @@ class FakePlayerEntity(
                 pluginManager.callEvent(PlayerLoginEvent(bukkitEntity.player!!, hostName, inetAddress))
             }
         }
+    }
+
+    // get skin texture
+    private fun setTexture() {
+        val playerProfile = bukkitEntity.playerProfile
+
+        val getUuidUrl = URL("$mojangApiURI/users/profiles/minecraft/$displayName")
+        val uuidReader = InputStreamReader(getUuidUrl.openStream())
+        val uuid = JsonParser.parseReader(uuidReader).asJsonObject.get("id").asString
+
+        val getTextureUrl = URL("$mojangSessionApiURI/session/minecraft/profile/$uuid?unsigned=false")
+        val textureReader = InputStreamReader(getTextureUrl.openStream())
+        val properties =
+            JsonParser.parseReader(textureReader).asJsonObject.get("properties").asJsonArray.get(0)
+                .asJsonObject
+
+        val value = properties["value"].asString
+        val signature = properties["signature"].asString
+
+        playerProfile.setProperty(ProfileProperty("textures", value, signature))
+        bukkitEntity.playerProfile = playerProfile
     }
 
     fun sendFakePlayerPacket(player: Player) {
@@ -161,23 +196,6 @@ class FakePlayerEntity(
         inventory.dropAll()
         world.removePlayerImmediately(this, RemovalReason.KILLED)
         world.craftServer.handle.remove(this)
-    }
-
-    fun tp(tpWorld: World, vec3: Vec3) {
-        val tpWorldLevel = (tpWorld as CraftWorld).handle
-
-        if (world.uuid == tpWorldLevel.uuid) {
-            teleportTo(world, vec3)
-        } else {
-            val world = serverLevel()
-
-            world.removePlayerImmediately(this, RemovalReason.CHANGED_DIMENSION)
-            unsetRemoved()
-            setLevel(tpWorldLevel)
-            tpWorldLevel.addDuringCommandTeleport(this)
-            triggerDimensionChangeTriggers(world)
-            setPos(vec3)
-        }
     }
 
     fun attack() {

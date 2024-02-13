@@ -1,6 +1,5 @@
 package org.xiaoxigua.fakeplayer.commands
 
-import net.minecraft.world.phys.Vec3
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.xiaoxigua.fakeplayer.CommandError
@@ -20,7 +19,7 @@ class TPHere(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComma
 
         if (sender is Player) {
             fakePlayers.find { it.displayName == name }
-                ?.tp(sender.world, Vec3(sender.location.toVector().toVector3f()))
+                ?.bukkitEntity?.teleport(sender)
                 ?: throw CommandError.CommandFakePlayerNotFound(name)
         }
 

@@ -1,5 +1,6 @@
 package org.xiaoxigua.fakeplayer
 
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import org.xiaoxigua.fakeplayer.commands.*
 import org.xiaoxigua.fakeplayer.commands.attack.Attack
@@ -14,6 +15,7 @@ class FakePlayerPlugin : JavaPlugin() {
     private val fakePlayers = mutableListOf<FakePlayerEntity>()
     companion object {
         var currentPlugin: JavaPlugin? = null
+        val logger = Bukkit.getLogger()
     }
 
     override fun onEnable() {
