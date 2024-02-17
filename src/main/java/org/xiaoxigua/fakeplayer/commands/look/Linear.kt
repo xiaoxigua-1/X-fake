@@ -1,4 +1,4 @@
-package org.xiaoxigua.fakeplayer.commands.rotate
+package org.xiaoxigua.fakeplayer.commands.look
 
 import org.bukkit.command.CommandSender
 import org.bukkit.scheduler.BukkitRunnable

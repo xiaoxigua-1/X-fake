@@ -24,9 +24,8 @@ class Spawn(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComman
         } else if (sender is Player && !fakePlayers.any { it.displayName == name }) {
             val location = sender.location
             val gameProfile = GameProfile(UUID.nameUUIDFromBytes(name.toByteArray()), name)
-            val fakePlayer = FakePlayerEntity(sender.server, sender.world, gameProfile)
+            val fakePlayer = FakePlayerEntity(sender.server, sender.world, gameProfile).spawn(sender.world, location)
 
-            fakePlayer.spawn(sender.world, location)
             fakePlayers.add(fakePlayer)
         }
 

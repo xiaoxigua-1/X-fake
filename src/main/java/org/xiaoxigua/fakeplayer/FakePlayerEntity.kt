@@ -3,6 +3,8 @@ package org.xiaoxigua.fakeplayer
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.PacketFlow
@@ -41,13 +43,13 @@ class FakePlayerEntity(
     val clientInfo: ClientInformation = ClientInformation.createDefault()
 ) : ServerPlayer((server as CraftServer).server, (world as CraftWorld).handle, profile, clientInfo) {
 
-    private val world = (world as CraftWorld).handle
     val taskManager = FakePlayerTask()
     private val mojangApiURI = "https://api.mojang.com/"
     private val mojangSessionApiURI = "https://sessionserver.mojang.com"
 
-    fun spawn(spawnWorld: World, location: Location) {
+    fun spawn(spawnWorld: World, location: Location): FakePlayerEntity {
         val spawnServerLevel = (spawnWorld as CraftWorld).handle
+        val playerList = server.playerList
 
         connection = object : ServerGamePacketListenerImpl(
             server,
@@ -67,22 +69,20 @@ class FakePlayerEntity(
         }
 
         // add fake player to server player list
-        server.playerList.placeNewPlayer(
+        playerList.placeNewPlayer(
             EmptyConnection(PacketFlow.CLIENTBOUND),
-            this,
+            playerList.getPlayerForLogin(gameProfile, clientInfo, this),
             CommonListenerCookie.createInitial(gameProfile)
         )
-        server.playerList.respawn(this, false, PlayerRespawnEvent.RespawnReason.PLUGIN)
+        val fakePlayer = if (bukkitEntity.isDead)
+            playerList.respawn(this, false, PlayerRespawnEvent.RespawnReason.DEATH)
+        else this
 
-        world.removePlayerImmediately(this, RemovalReason.CHANGED_DIMENSION)
-        unsetRemoved()
-        setLevel(spawnServerLevel)
-        spawnServerLevel.addRespawnedPlayer(this)
-        setPos(Vec3(location.toVector().toVector3f()))
-        setRot(location.yaw, location.pitch)
-        addTag("fakePlayer")
-        setLoadViewDistance(10)
-        sendAllPlayerPacket(::sendFakePlayerPacket)
+        fakePlayer.teleportTo(spawnServerLevel, Vec3(location.toVector().toVector3f()))
+        fakePlayer.addTag("fakePlayer")
+        fakePlayer.setLoadViewDistance(10)
+
+        return fakePlayer as FakePlayerEntity
     }
 
     // trigger player join event
@@ -123,39 +123,6 @@ class FakePlayerEntity(
         bukkitEntity.playerProfile = playerProfile
     }
 
-    fun sendFakePlayerPacket(player: Player) {
-        val connection = (player as CraftPlayer).handle.connection
-
-        sendFakePlayerPacket(connection)
-    }
-
-    private fun sendFakePlayerPacket(connection: ServerGamePacketListenerImpl) {
-        // add player to list
-        connection.send(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, this))
-
-        // update player list
-        connection.send(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED, this))
-
-        // make player spawn in world
-        connection.send(
-            ClientboundAddEntityPacket(
-                this,
-            )
-        )
-    }
-
-    private fun sendRemoveFakePlayerPacket(connection: ServerGamePacketListenerImpl) {
-        connection.send(ClientboundPlayerInfoRemovePacket(listOf(uuid)))
-
-        connection.send(ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED, this))
-
-        connection.send(
-            ClientboundRemoveEntitiesPacket(
-                id,
-            )
-        )
-    }
-
     private fun sendFakePlayerSwingMainArmAnimation(connection: ServerGamePacketListenerImpl) {
         connection.send(ClientboundAnimatePacket(bukkitEntity.handleRaw!!, 0))
     }
@@ -166,10 +133,6 @@ class FakePlayerEntity(
         progress: Int
     ) {
         connection.send(ClientboundBlockDestructionPacket(id, pos, progress))
-    }
-
-    private fun sendAllPlayerPacket(vararg sendPacket: (ServerGamePacketListenerImpl) -> Unit) {
-        sendAllPlayerPacket(Bukkit.getOnlinePlayers(), *sendPacket)
     }
 
     private fun sendNearPlayerPacket(vararg sendPacket: (ServerGamePacketListenerImpl) -> Unit) {
@@ -191,11 +154,10 @@ class FakePlayerEntity(
     }
 
     fun remove() {
-        sendAllPlayerPacket(::sendRemoveFakePlayerPacket)
         taskManager.removeAllTask()
         inventory.dropAll()
-        world.removePlayerImmediately(this, RemovalReason.KILLED)
-        world.craftServer.handle.remove(this)
+        server.server.broadcast(Component.text("$displayName left the game", NamedTextColor.YELLOW))
+        server.playerList.remove(this)
     }
 
     fun attack() {

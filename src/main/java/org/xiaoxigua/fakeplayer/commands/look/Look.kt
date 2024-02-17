@@ -1,4 +1,4 @@
-package org.xiaoxigua.fakeplayer.commands.rotate
+package org.xiaoxigua.fakeplayer.commands.look
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -8,7 +8,7 @@ import org.xiaoxigua.fakeplayer.SubCommand
 
 class Look(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand() {
     override val name = "look"
-    override val description = "set fake player self look at"
+    override val description = "set The player looks in the current"
 
     override fun onCommand(
         sender: CommandSender,
@@ -23,5 +23,9 @@ class Look(override val fakePlayers: MutableList<FakePlayerEntity>) : SubCommand
             fakePlayer.setRot(sender.location.yaw, sender.location.pitch)
 
         return true
+    }
+
+    init {
+        addSubCommand(::Linear)
     }
 }

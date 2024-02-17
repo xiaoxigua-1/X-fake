@@ -16,14 +16,8 @@ class FakePlayerInWorldEvent(private val fakePlayers: MutableList<FakePlayerEnti
         if (fakePlayer != null) {
             fakePlayer.remove()
             fakePlayers.remove(fakePlayer)
-            event.deathMessage(Component.text("${fakePlayer.displayName} left the game", NamedTextColor.YELLOW))
-        }
-    }
 
-    @EventHandler
-    fun onPlayerJoin(event: PlayerJoinEvent) {
-        fakePlayers.forEach {
-            it.sendFakePlayerPacket(event.player)
+            event.isCancelled = true
         }
     }
 }

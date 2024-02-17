@@ -7,8 +7,8 @@ import org.xiaoxigua.fakeplayer.commands.attack.Attack
 import org.xiaoxigua.fakeplayer.commands.breaking.BreakBlock
 import org.xiaoxigua.fakeplayer.commands.craft.Craft
 import org.xiaoxigua.fakeplayer.commands.inventory.Inventory
+import org.xiaoxigua.fakeplayer.commands.look.Look
 import org.xiaoxigua.fakeplayer.commands.place.Place
-import org.xiaoxigua.fakeplayer.commands.rotate.Rotate
 import org.xiaoxigua.fakeplayer.events.FakePlayerInWorldEvent
 
 class FakePlayerPlugin : JavaPlugin() {
@@ -28,7 +28,7 @@ class FakePlayerPlugin : JavaPlugin() {
             ::Kill,
             ::TPHere,
             ::Attack,
-            ::Rotate,
+            ::Look,
             ::Craft,
             ::Stop,
             ::Place,
