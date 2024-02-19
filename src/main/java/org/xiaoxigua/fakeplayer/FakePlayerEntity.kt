@@ -8,7 +8,8 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.PacketFlow
-import net.minecraft.network.protocol.game.*
+import net.minecraft.network.protocol.game.ClientboundAnimatePacket
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket
 import net.minecraft.server.level.ClientInformation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
@@ -182,7 +183,7 @@ class FakePlayerEntity(
 
         for (index in 2..<distancesBlock.size) {
             if (!distancesBlock[index].isPassable && !distancesBlock[index].isEmpty && !distancesBlock[index].isLiquid) {
-                if (distancesBlock[index - 1].canPlace(blockType.createBlockData()))
+                if (distancesBlock[index - 1].canPlace(blockType.createBlockData()) && (distancesBlock[index - 1].type.isAir || distancesBlock[index - 1].isLiquid))
                     lastBlock = distancesBlock[index - 1].location
                 break
             }
@@ -197,9 +198,9 @@ class FakePlayerEntity(
                     lastBlock.y + 1,
                     lastBlock.z + 1
                 )
-            ).isEmpty()
+            ).isEmpty() && !blockType.isEmpty
         ) {
-            inventory.getSelected().count -= 1
+            inventory.removeFromSelected(false)
             world.getBlockAt(lastBlock).type = blockType
         }
 
