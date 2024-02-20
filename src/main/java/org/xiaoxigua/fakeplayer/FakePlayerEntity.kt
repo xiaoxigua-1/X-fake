@@ -79,7 +79,18 @@ class FakePlayerEntity(
             playerList.respawn(this, false, PlayerRespawnEvent.RespawnReason.DEATH)
         else this
 
-        fakePlayer.teleportTo(spawnServerLevel, Vec3(location.toVector().toVector3f()))
+        if (spawnServerLevel.uuid != serverLevel().uuid) {
+            val origin = serverLevel()
+
+            origin.removePlayerImmediately(this, RemovalReason.CHANGED_DIMENSION)
+            fakePlayer.unsetRemoved()
+            fakePlayer.setServerLevel(spawnServerLevel)
+            spawnServerLevel.addDuringPortalTeleport(fakePlayer)
+            fakePlayer.triggerDimensionChangeTriggers(origin)
+            playerList.sendLevelInfo(fakePlayer, spawnServerLevel)
+            playerList.sendAllPlayerInfo(fakePlayer)
+        }
+        fakePlayer.setPos(Vec3(location.toVector().toVector3f()))
         fakePlayer.addTag("fakePlayer")
         fakePlayer.setLoadViewDistance(10)
 
