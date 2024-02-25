@@ -76,7 +76,7 @@ class FakePlayerEntity(
             CommonListenerCookie.createInitial(gameProfile)
         )
         val fakePlayer = if (bukkitEntity.isDead)
-            playerList.respawn(this, false, PlayerRespawnEvent.RespawnReason.DEATH)
+            playerList.respawn(this, true, PlayerRespawnEvent.RespawnReason.PLUGIN)
         else this
 
         if (spawnServerLevel.uuid != serverLevel().uuid) {

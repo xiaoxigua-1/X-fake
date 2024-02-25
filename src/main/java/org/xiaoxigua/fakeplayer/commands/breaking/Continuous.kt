@@ -19,7 +19,8 @@ class Continuous(override val fakePlayers: MutableList<FakePlayerEntity>) : SubC
 
         val task = object : BukkitRunnable() {
             override fun run() {
-                if (fakePlayer.taskManager.getTask(FakePlayerTask.TaskType.Breaking)?.isCancelled == true)
+                val isCancelled = fakePlayer.taskManager.getTask(FakePlayerTask.TaskType.Breaking)?.isCancelled
+                if (isCancelled == true || isCancelled == null)
                     fakePlayer.taskManager.addTask(FakePlayerTask.TaskType.Breaking, fakePlayer.breaking())
             }
         }.runTaskTimer(FakePlayerPlugin.currentPlugin!!, 0L, 2L)
