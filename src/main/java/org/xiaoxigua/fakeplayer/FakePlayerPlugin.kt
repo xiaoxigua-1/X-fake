@@ -34,7 +34,7 @@ class FakePlayerPlugin : JavaPlugin() {
             ::Place,
             ::BreakBlock,
             ::Inventory,
-            ::Riding
+            ::Mount
         )
         server.pluginManager.registerEvents(FakePlayerInWorldEvent(fakePlayers), this)
         server.scheduler.scheduleSyncRepeatingTask(this, {
