@@ -26,7 +26,7 @@ class Mount(override val fakePlayers: MutableList<FakePlayerEntity>) : SubComman
                 }
             }.random()
 
-        fakePlayer.bukkitEntity.addPassenger(nearEntity)
+        nearEntity.addPassenger(fakePlayer.bukkitEntity)
 
         return true
     }

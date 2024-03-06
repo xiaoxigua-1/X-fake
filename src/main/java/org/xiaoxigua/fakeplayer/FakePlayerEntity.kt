@@ -3,8 +3,6 @@ package org.xiaoxigua.fakeplayer
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.PacketFlow
@@ -14,14 +12,12 @@ import net.minecraft.server.level.ClientInformation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.server.network.ServerGamePacketListenerImpl
-import net.minecraft.world.phys.Vec3
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.craftbukkit.v1_20_R3.CraftServer
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerLoginEvent
@@ -76,7 +72,7 @@ class FakePlayerEntity(
             CommonListenerCookie.createInitial(gameProfile)
         )
         val fakePlayer = if (bukkitEntity.isDead)
-            playerList.respawn(this, true, PlayerRespawnEvent.RespawnReason.PLUGIN)
+            playerList.respawn(this, false, PlayerRespawnEvent.RespawnReason.PLUGIN)
         else this
 
         if (spawnServerLevel.uuid != serverLevel().uuid) {
@@ -90,8 +86,7 @@ class FakePlayerEntity(
             playerList.sendLevelInfo(fakePlayer, spawnServerLevel)
             playerList.sendAllPlayerInfo(fakePlayer)
         }
-        fakePlayer.setPos(Vec3(location.toVector().toVector3f()))
-        fakePlayer.addTag("fakePlayer")
+        fakePlayer.forceSetPositionRotation(location.x, location.y, location.z, location.yaw, location.pitch)
         fakePlayer.setLoadViewDistance(10)
 
         return fakePlayer as FakePlayerEntity
@@ -168,8 +163,7 @@ class FakePlayerEntity(
     fun remove() {
         taskManager.removeAllTask()
         inventory.dropAll()
-        server.server.broadcast(Component.text("$displayName left the game", NamedTextColor.YELLOW))
-        server.playerList.remove(this)
+        server.server.broadcast(server.playerList.remove(this))
     }
 
     fun attack() {
@@ -265,6 +259,7 @@ class FakePlayerEntity(
         return task
     }
 
+    /*
     fun riding() {
         val iterator = BlockIterator(bukkitEntity, 4)
 
@@ -309,4 +304,5 @@ class FakePlayerEntity(
             break
         }
     }
+     */
 }
